@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pace + Log &#8212; AppADay 051</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0B1426;
+  --slate:   #1E2D4A;
+  --mid:     #2E4166;
+  --muted:   #7A8BA0;
+  --light:   #E8EDF5;
+  --white:   #F5F8FF;
+  --amber:   #F5A623;
+  --amber2:  #E8901A;
+  --green:   #10b981;
+  --red:     #ef4444;
+  --blue:    #3b82f6;
+  --purple:  #a855f7;
+  --radius:  12px;
+}
+
+html, body {
+  min-height: 100dvh;
+  background: var(--navy);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* -- HEADER ------------------------------------------- */
+.site-header {
+  background: var(--slate);
+  border-bottom: 1px solid var(--mid);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  gap: 12px;
+}
+.header-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.app-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; color: var(--amber);
+  text-transform: uppercase;
+}
+.app-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700;
+  letter-spacing: .02em; color: var(--white);
+}
+.back-link { font-size: 12px; color: var(--muted); text-decoration: none; transition: color .2s; flex-shrink: 0; }
+.back-link:hover { color: var(--amber); }
+
+/* -- TABS ---------------------------------------------- */
+.tab-nav {
+  display: flex;
+  background: var(--navy);
+  border-bottom: 1px solid var(--mid);
+  position: sticky;
+  top: 53px;
+  z-index: 99;
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 13px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color .18s, border-color .18s;
+}
+.tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+.tab-btn:hover:not(.active) { color: var(--light); }
+
+/* -- PACE REFERENCE STRIP ------------------------------ */
+.pace-strip {
+  background: rgba(245,166,35,0.08);
+  border-bottom: 1px solid rgba(245,166,35,0.2);
+  padding: 8px 20px;
+  display: none;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.pace-strip.visible { display: flex; }
+.pace-strip-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.pace-strip-items { display: flex; gap: 20px; flex-wrap: wrap; }
+.pace-strip-item { display: flex; align-items: baseline; gap: 5px; }
+.pace-strip-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+}
+.pace-strip-sub { font-size: 11px; color: var(--muted); }
+.pace-strip-race { color: var(--amber); }
+
+/* -- TAB PANELS ---------------------------------------- */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* -- PLAN TAB: LAYOUT ---------------------------------- */
+.plan-wrap {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 0;
+  min-height: calc(100dvh - 100px);
+}
+@media (max-width: 800px) {
+  .plan-wrap { grid-template-columns: 1fr; }
+}
+
+/* -- PLAN: LEFT PANEL ---------------------------------- */
+.panel-left {
+  background: var(--slate);
+  border-right: 1px solid var(--mid);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  overflow-y: auto;
+}
+
+.panel-section-label {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+}
+
+.distance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.dist-btn {
+  background: var(--mid); border: 2px solid transparent;
+  border-radius: 8px; padding: 10px 4px;
+  cursor: pointer; transition: all .18s; text-align: center;
+}
+.dist-btn:hover { border-color: var(--amber); }
+.dist-btn.active { background: var(--amber); border-color: var(--amber); }
+.dist-btn .dist-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--white); display: block;
+}
+.dist-btn.active .dist-label { color: var(--navy); }
+.dist-btn .dist-sub { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+.dist-btn.active .dist-sub { color: var(--navy); opacity: .75; }
+
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-size: 12px; font-weight: 500; color: var(--muted); }
+
+.time-inputs { display: flex; gap: 6px; align-items: center; }
+.time-inputs input {
+  width: 60px;
+  background: var(--mid); border: 1px solid var(--mid);
+  border-radius: 8px; color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 24px; font-weight: 600;
+  text-align: center; padding: 10px 6px;
+  outline: none; transition: border-color .18s;
+}
+.time-inputs input:focus { border-color: var(--amber); }
+.time-sep { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; color: var(--muted); }
+.time-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+input[type="date"], select {
+  display: block; width: 100%;
+  background: var(--mid); border: 1px solid var(--mid);
+  border-radius: 8px; color: var(--white);
+  font-family: 'Inter', sans-serif; font-size: 14px;
+  padding: 10px 12px; outline: none;
+  min-height: 44px; line-height: 1.4;
+  cursor: pointer; transition: border-color .18s;
+  color-scheme: dark; -webkit-appearance: none; appearance: none;
+}
+input[type="date"]:focus, select:focus { border-color: var(--amber); }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8BA0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+select option { background: var(--slate); }
+
+.generate-btn {
+  background: var(--amber); color: var(--navy);
+  border: none; border-radius: var(--radius);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700;
+  letter-spacing: .05em; padding: 14px;
+  cursor: pointer; transition: background .18s, transform .1s;
+  text-transform: uppercase; margin-top: 4px;
+}
+.generate-btn:hover { background: var(--amber2); }
+.generate-btn:active { transform: scale(.98); }
+
+.method-card {
+  background: var(--mid); border-radius: var(--radius);
+  padding: 14px 16px; font-size: 12px; color: var(--muted);
+  line-height: 1.6; display: none;
+}
+.method-card.visible { display: block; }
+.method-card strong { color: var(--light); display: block; margin-bottom: 4px; }
+
+/* -- PLAN: RIGHT PANEL --------------------------------- */
+.panel-right {
+  padding: 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (max-width: 800px) { .panel-right { padding: 20px 16px; } }
+
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 16px; text-align: center;
+  opacity: .5; padding: 60px 20px;
+}
+.empty-icon { font-size: 56px; line-height: 1; }
+.empty-state h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 700; color: var(--muted);
+}
+.empty-state p { font-size: 14px; color: var(--muted); max-width: 280px; }
+
+.plan-header { display: none; }
+.plan-header.visible { display: block; }
+.plan-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 800;
+  letter-spacing: .02em; color: var(--white); margin-bottom: 4px;
+}
+.plan-subtitle { font-size: 13px; color: var(--muted); }
+
+.pace-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.pace-card {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); padding: 14px 16px;
+}
+.pace-card-label {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+}
+.pace-card-value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--amber); line-height: 1;
+}
+.pace-card-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.chart-wrap {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); padding: 20px; display: none;
+}
+.chart-wrap.visible { display: block; }
+.chart-title {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 16px;
+}
+.chart-inner { position: relative; height: 120px; }
+canvas#mileageChart { width: 100%; height: 100%; }
+
+.weeks-wrap { display: none; }
+.weeks-wrap.visible { display: flex; flex-direction: column; gap: 8px; }
+
+.week-card {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color .18s;
+}
+.week-card.current-week { border-color: var(--amber); }
+.week-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px; cursor: pointer;
+  user-select: none; gap: 12px;
+}
+.week-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+.week-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--white);
+  white-space: nowrap; transition: color .18s; min-width: 64px;
+}
+.week-header:hover .week-num { color: var(--amber); }
+.week-phase { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.week-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.week-miles { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; color: var(--light); white-space: nowrap; }
+.week-miles span { font-size: 11px; color: var(--muted); font-family: 'Inter', sans-serif; font-weight: 400; }
+.week-chevron { color: var(--muted); font-size: 14px; transition: transform .2s; }
+.week-card.open .week-chevron { transform: rotate(180deg); }
+.week-bar-wrap { padding: 0 16px 10px; display: none; }
+.week-card.open .week-bar-wrap { display: block; }
+.week-bar-track { height: 3px; background: var(--mid); border-radius: 2px; overflow: hidden; }
+.week-bar-fill { height: 100%; background: var(--amber); border-radius: 2px; transition: width .4s ease; }
+.week-days { display: none; flex-direction: column; gap: 0; border-top: 1px solid var(--mid); }
+.week-card.open .week-days { display: flex; }
+.day-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 12px 16px; border-bottom: 1px solid var(--mid);
+}
+.day-row:last-child { border-bottom: none; }
+.day-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); min-width: 36px; padding-top: 1px;
+}
+.day-date-lbl { font-size: 11px; color: var(--muted); white-space: nowrap; padding-top: 3px; }
+.day-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.day-dot.rest     { background: var(--mid); }
+.day-dot.easy     { background: var(--green); }
+.day-dot.tempo    { background: var(--amber); }
+.day-dot.long     { background: #6B8EFF; }
+.day-dot.interval { background: var(--red); }
+.day-dot.cross    { background: var(--purple); }
+.day-desc { flex: 1; }
+.day-title { font-size: 13px; font-weight: 600; color: var(--light); margin-bottom: 2px; }
+.day-detail { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.day-miles { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--white); white-space: nowrap; padding-top: 1px; }
+.day-miles.rest-miles { color: var(--muted); font-size: 13px; font-family: 'Inter', sans-serif; }
+/* Schedule preference controls */
+.day-picker { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.day-chip {
+  background: var(--mid); border: 2px solid transparent;
+  border-radius: 6px; padding: 7px 2px;
+  cursor: pointer; transition: all .15s;
+  text-align: center; user-select: none;
+}
+.day-chip:hover { border-color: var(--amber); }
+.day-chip.selected { background: var(--amber); border-color: var(--amber); }
+.day-chip.disabled-day { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); }
+.day-chip.disabled-day.selected { background: var(--red); border-color: var(--red); }
+.day-chip .dc-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--white); display: block; letter-spacing:.03em;
+}
+.day-chip.selected .dc-label { color: var(--navy); }
+.day-chip.disabled-day .dc-label { color: var(--white); }
+.sched-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* Plan lock styles */
+.plan-locked .dist-btn { pointer-events: none; opacity: .55; }
+.plan-locked .dist-btn.active { opacity: 1; }
+.plan-locked input,
+.plan-locked select { pointer-events: none; opacity: .55; }
+.plan-locked .generate-btn { display: none; }
+.change-plan-row {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245,166,35,0.08);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  gap: 10px;
+}
+.change-plan-row.visible { display: flex; }
+.change-plan-label { font-size: 12px; color: var(--amber); flex: 1; line-height: 1.4; }
+.change-plan-btn {
+  background: transparent;
+  border: 1px solid var(--amber);
+  border-radius: 6px;
+  color: var(--amber);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 6px 14px; cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.change-plan-btn:hover { background: var(--amber); color: var(--navy); }
+
+/* Confirm modal */
+.confirm-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 400;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.confirm-box {
+  background: var(--slate);
+  border: 1px solid var(--mid);
+  border-radius: 14px;
+  max-width: 340px; width: 100%;
+  padding: 24px;
+}
+.confirm-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: var(--white); margin-bottom: 10px;
+}
+.confirm-body {
+  font-size: 13px; color: var(--muted);
+  line-height: 1.6; margin-bottom: 20px;
+}
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-ok {
+  flex: 1;
+  background: var(--red); color: var(--white);
+  border: none; border-radius: 7px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 11px; cursor: pointer;
+  transition: opacity .15s;
+}
+.confirm-ok:hover { opacity: .85; }
+.confirm-cancel {
+  flex: 1;
+  background: transparent; border: 1px solid var(--mid);
+  border-radius: 7px; color: var(--muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 11px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.confirm-cancel:hover { border-color: var(--light); color: var(--light); }
+
+/* Post-run encouragement modal */
+.encourage-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.encourage-box {
+  background: var(--slate);
+  border: 1px solid var(--mid);
+  border-radius: 16px;
+  max-width: 400px; width: 100%;
+  padding: 28px 24px;
+  text-align: center;
+}
+.encourage-emoji { font-size: 52px; line-height: 1; margin-bottom: 12px; }
+.encourage-headline {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+.encourage-body {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.6; margin-bottom: 20px;
+}
+.encourage-stat {
+  background: var(--navy);
+  border: 1px solid var(--mid);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 20px;
+}
+.encourage-dismiss {
+  background: var(--amber); color: var(--navy);
+  border: none; border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 12px 32px; cursor: pointer;
+  transition: background .15s;
+}
+.encourage-dismiss:hover { background: var(--amber2); }
+
+.taper-badge {
+  display: inline-block;
+  background: rgba(245,166,35,.15); color: var(--amber);
+  border: 1px solid rgba(245,166,35,.3);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  border-radius: 4px; padding: 2px 7px;
+  margin-left: 8px; vertical-align: middle;
+}
+.plan-footer { text-align: center; font-size: 12px; color: var(--muted); padding: 8px 0 24px; display: none; }
+.plan-footer.visible { display: block; }
+.week-dates { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* -- LOG TAB ------------------------------------------- */
+.log-main {
+  max-width: 900px; width: 100%;
+  margin: 0 auto; padding: 24px 16px 48px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+.stat-card {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); padding: 14px 12px; text-align: center;
+}
+.stat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 700;
+  color: var(--blue); line-height: 1.1;
+}
+.stat-val.green { color: var(--green); }
+.stat-val.amber { color: var(--amber); }
+.stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+
+.log-panel {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); padding: 18px;
+}
+.log-panel-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 14px;
+  flex-wrap: wrap; gap: 8px;
+}
+.log-panel-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Week dots */
+.week-bar-log {
+  background: var(--slate); border: 1px solid var(--mid);
+  border-radius: var(--radius); padding: 14px 18px;
+}
+.week-dot-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.day-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.day-cell-name { font-size: 9px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+.day-dot-log {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--navy); border: 1px solid var(--mid);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  transition: background .15s;
+}
+.day-dot-log.has-run { background: rgba(59,130,246,0.25); border-color: var(--blue); color: var(--blue); }
+.day-dot-log.today { border-color: var(--amber); }
+.day-dist-log { font-size: 8px; color: var(--muted); font-family: 'Inter', sans-serif; }
+
+/* Chart controls */
+.chart-controls { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.toggle-group { display: flex; gap: 3px; }
+.toggle-btn {
+  font-size: 11px; padding: 3px 9px;
+  border-radius: 4px; border: 1px solid var(--mid);
+  background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.toggle-btn.active { background: var(--amber); border-color: var(--amber); color: var(--navy); font-weight: 700; }
+.chart-sep { width: 1px; height: 20px; background: var(--mid); }
+.chart-canvas-wrap { position: relative; }
+canvas#logChart { width: 100%; height: 180px; display: block; cursor: crosshair; }
+.chart-tooltip {
+  position: absolute; background: rgba(11,20,38,0.95);
+  border: 1px solid var(--mid); border-radius: 6px;
+  padding: 5px 9px; font-size: 12px;
+  font-family: 'Inter', sans-serif; color: var(--white);
+  pointer-events: none; white-space: nowrap; z-index: 10; display: none;
+}
+.chart-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* Pace comparison badge */
+.pace-compare {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 6px; padding: 3px 10px;
+  font-size: 11px; color: var(--amber);
+}
+.pace-compare.faster { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+.pace-compare.slower { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); color: var(--red); }
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1 / -1; }
+.field label {
+  font-size: 11px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+}
+.field input, .field select, .field textarea {
+  background: var(--navy); border: 1px solid var(--mid);
+  border-radius: 6px; color: var(--white);
+  font-family: 'Inter', sans-serif; font-size: 14px;
+  padding: 9px 11px; width: 100%; outline: none;
+  transition: border-color .15s; -webkit-appearance: none; min-width: 0;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--amber); }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8BA0' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  color-scheme: dark;
+}
+.field select option { background: var(--slate); }
+.field textarea { resize: vertical; min-height: 60px; }
+.shoe-indicator { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.shoe-indicator span { color: var(--green); font-weight: 600; }
+.fuel-entries { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.fuel-row { display: flex; gap: 6px; align-items: center; }
+.fuel-row input, .fuel-row select { flex: 1; }
+.fuel-time { width: 80px !important; flex: 0 0 80px !important; }
+.btn-icon { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px; transition: color .15s; }
+.btn-icon:hover { color: var(--red); }
+.btn { padding: 10px 20px; border-radius: 6px; border: none; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .15s, transform .1s; }
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--amber); color: var(--navy); }
+.btn-primary:hover { opacity: .88; }
+.btn-ghost { background: transparent; border: 1px solid var(--mid); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--light); color: var(--light); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.form-actions { display: flex; gap: 8px; margin-top: 8px; }
+
+/* Table */
+.entries-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: left; font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 8px 10px; border-bottom: 1px solid var(--mid); }
+tbody tr { border-bottom: 1px solid rgba(46,65,102,0.5); transition: background .12s; cursor: pointer; }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody td { padding: 9px 10px; vertical-align: middle; }
+.td-date { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--muted); }
+.td-dist { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--amber); }
+.td-pace { font-size: 12px; }
+.td-feel { font-size: 18px; line-height: 1; }
+.td-del, .td-edit { background: none; border: none; color: var(--mid); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; transition: color .15s; }
+.td-del:hover { color: var(--red); }
+.td-edit:hover { color: var(--blue); }
+.td-actions { white-space: nowrap; }
+.type-pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; }
+.pill-easy     { background: rgba(16,185,129,0.15); color: var(--green); }
+.pill-tempo    { background: rgba(245,166,35,0.15);  color: var(--amber); }
+.pill-long     { background: rgba(59,130,246,0.15);  color: var(--blue); }
+.pill-interval { background: rgba(239,68,68,0.15);   color: var(--red); }
+.pill-race     { background: rgba(168,85,247,0.15);  color: var(--purple); }
+.pill-rest     { background: rgba(122,139,160,0.15); color: var(--muted); }
+.empty-log { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+.empty-log .big { font-size: 36px; margin-bottom: 10px; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-box { background: var(--slate); border: 1px solid var(--mid); border-radius: 14px; max-width: 480px; width: 100%; max-height: 90dvh; overflow-y: auto; padding: 24px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
+.modal-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; }
+.modal-close:hover { color: var(--white); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.detail-item { display: flex; flex-direction: column; gap: 3px; }
+.detail-lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.detail-val { font-size: 15px; font-weight: 500; }
+.detail-val.mono { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; }
+.detail-full { grid-column: 1 / -1; }
+.detail-note { background: var(--navy); border: 1px solid var(--mid); border-radius: 6px; padding: 10px 12px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.fuel-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.fuel-item { background: var(--navy); border: 1px solid var(--mid); border-radius: 6px; padding: 8px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; }
+.fuel-item-time { font-size: 11px; color: var(--muted); }
+.modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+.modal-actions .btn { flex: 1; }
+
+/* Settings */
+.settings-section { margin-bottom: 20px; }
+.settings-section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+.shoe-list, .fuel-preset-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.shoe-item, .fuel-preset-item { display: flex; align-items: center; gap: 8px; background: var(--navy); border: 1px solid var(--mid); border-radius: 6px; padding: 8px 10px; }
+.shoe-item label, .fuel-preset-item label { font-size: 13px; flex: 1; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--light); cursor: pointer; }
+.shoe-radio { accent-color: var(--amber); }
+.add-row { display: flex; gap: 8px; }
+.add-row input { flex: 1; background: var(--navy); border: 1px solid var(--mid); border-radius: 6px; color: var(--white); font-family: 'Inter', sans-serif; font-size: 14px; padding: 9px 11px; outline: none; }
+.add-row input:focus { border-color: var(--amber); }
+.gear-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px; transition: color .15s; }
+.gear-btn:hover { color: var(--white); }
+
+/* Today's workout card */
+.today-card {
+  display: none;
+  background: var(--slate);
+  border: 1px solid var(--mid);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0; /* lives in log-main gap */
+}
+.today-card.visible { display: block; }
+.today-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+  gap: 8px;
+}
+.today-card-eyebrow {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: var(--amber);
+}
+.today-card-date {
+  font-size: 11px; color: var(--muted);
+}
+.today-card-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 14px;
+}
+.today-type-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.today-type-dot.rest     { background: var(--mid); }
+.today-type-dot.easy     { background: var(--green); }
+.today-type-dot.tempo    { background: var(--amber); }
+.today-type-dot.long     { background: #6B8EFF; }
+.today-type-dot.interval { background: var(--red); }
+.today-type-dot.cross    { background: var(--purple); }
+.today-type-dot.race     { background: var(--purple); }
+.today-info { flex: 1; min-width: 0; }
+.today-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 22px; font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 3px;
+}
+.today-detail {
+  font-size: 12px; color: var(--muted);
+  line-height: 1.5;
+}
+.today-miles-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 800;
+  color: var(--amber);
+  white-space: nowrap;
+  line-height: 1;
+}
+.today-miles-unit {
+  font-size: 11px; color: var(--muted);
+  text-align: right; margin-top: 2px;
+}
+.today-rest-msg {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--muted);
+}
+.today-log-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 0 16px 14px;
+  background: rgba(245,166,35,0.1);
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: 7px;
+  color: var(--amber);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 9px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  text-align: center;
+}
+.today-log-btn:hover { background: rgba(245,166,35,0.2); border-color: var(--amber); }
+.today-no-plan {
+  padding: 14px 16px;
+  font-size: 13px; color: var(--muted);
+}
+
+/* Week override controls */
+.week-override-btn {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--mid);
+  border-radius: 5px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.week-override-btn:hover { border-color: var(--amber); color: var(--amber); }
+.plan-active .week-override-btn { display: flex; }
+
+.week-override-panel {
+  display: none;
+  padding: 12px 16px;
+  border-top: 1px solid var(--mid);
+  background: rgba(11,20,38,0.5);
+  flex-direction: column;
+  gap: 8px;
+}
+.week-override-panel.open { display: flex; }
+.override-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--amber);
+}
+.override-hint { font-size: 11px; color: var(--muted); }
+.override-day-row { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.override-chip {
+  background: var(--mid); border: 2px solid transparent;
+  border-radius: 5px; padding: 5px 8px;
+  cursor: pointer; transition: all .14s;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--white); user-select: none;
+  position: relative;
+}
+.override-chip:hover { border-color: var(--red); }
+.override-chip.off { background: rgba(239,68,68,0.2); border-color: var(--red); color: var(--red); }
+.override-chip.locked { opacity: .35; cursor: not-allowed; }
+.override-apply-btn {
+  align-self: flex-start;
+  background: var(--amber); color: var(--navy);
+  border: none; border-radius: 5px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: 7px 16px; cursor: pointer;
+  transition: background .15s;
+  margin-top: 2px;
+}
+.override-apply-btn:hover { background: var(--amber2); }
+.override-clear-btn {
+  align-self: flex-start;
+  background: transparent; border: 1px solid var(--mid);
+  border-radius: 5px; color: var(--muted);
+  font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+  padding: 6px 12px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.override-clear-btn:hover { border-color: var(--red); color: var(--red); }
+.override-badge {
+  display: inline-block;
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: var(--red);
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  border-radius: 3px; padding: 1px 5px;
+  margin-left: 6px; vertical-align: middle;
+}
+.shifted-badge {
+  display: inline-block;
+  background: rgba(245,166,35,0.12);
+  border: 1px solid rgba(245,166,35,0.25);
+  color: var(--amber);
+  font-size: 9px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  border-radius: 3px; padding: 1px 5px;
+  margin-left: 6px; vertical-align: middle;
+}
+
+/* Plan date mode toggle */
+.date-mode-toggle {
+  display: flex; gap: 0;
+  border: 1px solid var(--mid);
+  border-radius: 8px; overflow: hidden;
+  margin-bottom: 10px;
+}
+.date-mode-btn {
+  flex: 1; background: transparent; border: none;
+  color: var(--muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase;
+  padding: 8px 6px; cursor: pointer;
+  transition: background .15s, color .15s; text-align: center;
+}
+.date-mode-btn.active { background: var(--mid); color: var(--white); }
+.date-mode-btn:hover:not(.active) { color: var(--light); }
+.date-field-wrap { display: none; }
+.date-field-wrap.visible { display: block; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--mid); border-radius: 3px; }
+
+@media (max-width: 600px) {
+  .stat-row { grid-template-columns: repeat(2,1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: 1; }
+  thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
+  .panel-left { border-right: none; border-bottom: 1px solid var(--mid); }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <span class="app-num">051</span>
+    <span class="app-title">Pace + Log</span>
+  </div>
+  <a href="https://augustineiacopelli.github.io/appaday/" class="back-link">&#8592; Portfolio</a>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" id="tabPlanBtn" onclick="switchTab('plan')">&#127939; Plan</button>
+  <button class="tab-btn" id="tabLogBtn" onclick="switchTab('log')">&#128196; Log</button>
+</nav>
+
+<!-- Pace reference strip (visible after plan generated) -->
+<div class="pace-strip" id="paceStrip">
+  <span class="pace-strip-label">Active Plan</span>
+  <div class="pace-strip-items">
+    <div class="pace-strip-item">
+      <span class="pace-strip-val pace-strip-race" id="stripGoalPace">--:--</span>
+      <span class="pace-strip-sub">goal/mi</span>
+    </div>
+    <div class="pace-strip-item">
+      <span class="pace-strip-val" id="stripEasyPace">--:--</span>
+      <span class="pace-strip-sub">easy/mi</span>
+    </div>
+    <div class="pace-strip-item">
+      <span class="pace-strip-val" id="stripDist">--</span>
+      <span class="pace-strip-sub" id="stripDistLabel">plan</span>
+    </div>
+  </div>
+</div>
+
+<!-- =============== PLAN TAB =============== -->
+<div class="tab-panel active" id="panelPlan">
+  <div class="plan-wrap">
+
+    <aside class="panel-left">
+
+      <div>
+        <div class="panel-section-label">Race Distance</div>
+        <div class="distance-grid">
+          <button class="dist-btn active" data-dist="5k"><span class="dist-label">5K</span><span class="dist-sub">3.1 mi</span></button>
+          <button class="dist-btn" data-dist="10k"><span class="dist-label">10K</span><span class="dist-sub">6.2 mi</span></button>
+          <button class="dist-btn" data-dist="half"><span class="dist-label">HM</span><span class="dist-sub">13.1 mi</span></button>
+          <button class="dist-btn" data-dist="marathon"><span class="dist-label">FM</span><span class="dist-sub">26.2 mi</span></button>
+          <button class="dist-btn" data-dist="50k"><span class="dist-label">50K</span><span class="dist-sub">31.1 mi</span></button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Goal Finish Time</div>
+        <div class="input-group">
+          <div class="time-inputs">
+            <input type="number" id="hrs" min="0" max="23" placeholder="0" value="0" aria-label="Hours">
+            <span class="time-sep">h</span>
+            <input type="number" id="mins" min="0" max="59" placeholder="25" value="25" aria-label="Minutes">
+            <span class="time-sep">m</span>
+            <input type="number" id="secs" min="0" max="59" placeholder="00" value="0" aria-label="Seconds">
+            <span class="time-sep">s</span>
+          </div>
+          <div class="time-hint" id="goalHint">Goal: 25:00 for a 5K</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Current Fitness</div>
+        <div class="input-group">
+          <label for="fitness">Running base</label>
+          <select id="fitness">
+            <option value="beginner">Beginner &mdash; &lt;3 months or &lt;10 mi/wk</option>
+            <option value="novice" selected>Novice &mdash; 3&ndash;12 months, 10&ndash;20 mi/wk</option>
+            <option value="intermediate">Intermediate &mdash; 1+ yr, 20&ndash;35 mi/wk</option>
+            <option value="advanced">Advanced &mdash; 2+ yrs, 35+ mi/wk</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Training Style</div>
+        <div class="input-group">
+          <label for="style">Preferred approach</label>
+          <select id="style">
+            <option value="balanced" selected>Balanced &mdash; easy, tempo &amp; long runs</option>
+            <option value="polarized">Polarized &mdash; 80/20 (Fitzgerald)</option>
+            <option value="galloway">Run-Walk &mdash; Galloway intervals</option>
+            <option value="conservative">Conservative &mdash; injury prevention focus</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Long Run Day</div>
+        <div class="input-group">
+          <div class="day-picker" id="longRunPicker">
+            <div class="day-chip" data-day="0"><span class="dc-label">Mon</span></div>
+            <div class="day-chip" data-day="1"><span class="dc-label">Tue</span></div>
+            <div class="day-chip" data-day="2"><span class="dc-label">Wed</span></div>
+            <div class="day-chip" data-day="3"><span class="dc-label">Thu</span></div>
+            <div class="day-chip" data-day="4"><span class="dc-label">Fri</span></div>
+            <div class="day-chip selected" data-day="5"><span class="dc-label">Sat</span></div>
+            <div class="day-chip" data-day="6"><span class="dc-label">Sun</span></div>
+          </div>
+          <div class="sched-hint">The week's longest run will anchor to this day.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Days Off <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted);">(no running)</span></div>
+        <div class="input-group">
+          <div class="day-picker" id="daysOffPicker">
+            <div class="day-chip" data-day="0"><span class="dc-label">Mon</span></div>
+            <div class="day-chip" data-day="1"><span class="dc-label">Tue</span></div>
+            <div class="day-chip" data-day="2"><span class="dc-label">Wed</span></div>
+            <div class="day-chip" data-day="3"><span class="dc-label">Thu</span></div>
+            <div class="day-chip" data-day="4"><span class="dc-label">Fri</span></div>
+            <div class="day-chip" data-day="5"><span class="dc-label">Sat</span></div>
+            <div class="day-chip" data-day="6"><span class="dc-label">Sun</span></div>
+          </div>
+          <div class="sched-hint" id="daysOffHint">Tap days you can never run. Runs will shift or mileage will redistribute.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-label">Plan Dates</div>
+        <div class="input-group">
+          <div class="date-mode-toggle">
+            <button class="date-mode-btn active" id="modeBtnStart" onclick="setDateMode('start')">From Start Date</button>
+            <button class="date-mode-btn" id="modeBtnRace" onclick="setDateMode('race')">From Race Date</button>
+          </div>
+          <div class="date-field-wrap visible" id="startDateWrap">
+            <label for="startDate">When does your training begin?</label>
+            <input type="date" id="startDate">
+            <div class="time-hint" id="startDateHint">Your plan will run from this date forward.</div>
+          </div>
+          <div class="date-field-wrap" id="raceDateWrap">
+            <label for="raceDate">Race day</label>
+            <input type="date" id="raceDate">
+            <div class="time-hint" id="raceDateHint">We will count back from your race to set the start date.</div>
+          </div>
+          <div class="time-hint" id="planWindowHint" style="margin-top:6px;color:var(--green);"></div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn">Generate Plan</button>
+
+      <div class="change-plan-row" id="changePlanRow">
+        <span class="change-plan-label">&#128274; Plan is active. Changing it will clear your current plan.</span>
+        <button class="change-plan-btn" onclick="unlockPlan()">Change</button>
+      </div>
+
+      <div class="method-card" id="methodCard">
+        <strong id="methodTitle"></strong>
+        <span id="methodDesc"></span>
+      </div>
+
+    </aside>
+
+    <main class="panel-right" id="panelRight">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">&#127939;</div>
+        <h2>Your plan awaits</h2>
+        <p>Select a distance, set your goal time, and generate your personalized training plan.</p>
+      </div>
+      <div class="plan-header" id="planHeader">
+        <div class="plan-title" id="planTitle"></div>
+        <div class="plan-subtitle" id="planSubtitle"></div>
+      </div>
+      <div class="pace-grid" id="paceGrid"></div>
+      <div class="chart-wrap" id="chartWrap">
+        <div class="chart-title">Weekly Mileage Ramp</div>
+        <div class="chart-inner"><canvas id="mileageChart"></canvas></div>
+      </div>
+      <div class="weeks-wrap" id="weeksWrap"></div>
+      <div class="plan-footer" id="planFooter">
+        Plan generated based on your inputs. Adjust weekly mileage &#177;10% based on fatigue and life.
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- =============== LOG TAB =============== -->
+<div class="tab-panel" id="panelLog">
+  <div class="log-main">
+
+    <!-- Today's prescribed workout -->
+    <div class="today-card" id="todayCard">
+      <div class="today-card-header">
+        <span class="today-card-eyebrow">Today</span>
+        <span class="today-card-date" id="todayCardDate"></span>
+      </div>
+      <div class="today-card-body" id="todayCardBody"></div>
+      <button class="today-log-btn" id="todayLogBtn" style="display:none;" onclick="prefillTodayRun()">Log This Run</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val amber" id="statTotal">0.0</div><div class="stat-lbl">Total Miles</div></div>
+      <div class="stat-card"><div class="stat-val green" id="statRuns">0</div><div class="stat-lbl">Total Runs</div></div>
+      <div class="stat-card"><div class="stat-val" id="statWeek">0.0</div><div class="stat-lbl">This Week</div></div>
+      <div class="stat-card"><div class="stat-val" id="statAvgPace">&mdash;</div><div class="stat-lbl">Avg Pace</div></div>
+    </div>
+
+    <div class="week-bar-log">
+      <div class="log-panel-title" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">This Week</div>
+      <div class="week-dot-grid" id="weekGrid"></div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-panel-header">
+        <span class="log-panel-title">Weekly Mileage</span>
+        <div class="chart-controls">
+          <div class="toggle-group">
+            <button class="toggle-btn" id="btn1w"  onclick="setChartRange('1w')">1W</button>
+            <button class="toggle-btn" id="btn2w"  onclick="setChartRange('2w')">2W</button>
+            <button class="toggle-btn" id="btn4w"  onclick="setChartRange('4w')">4W</button>
+            <button class="toggle-btn active" id="btn12w" onclick="setChartRange('12w')">12W</button>
+            <button class="toggle-btn" id="btn26w" onclick="setChartRange('26w')">26W</button>
+            <button class="toggle-btn" id="btnAll" onclick="setChartRange('all')">All</button>
+          </div>
+          <div class="chart-sep"></div>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btnBar"  onclick="setChartType('bar')">Bar</button>
+            <button class="toggle-btn"        id="btnLine" onclick="setChartType('line')">Line</button>
+          </div>
+        </div>
+      </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="logChart"></canvas>
+        <div class="chart-tooltip" id="chartTooltip"></div>
+      </div>
+      <div class="chart-legend" id="chartLegend"></div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-panel-header">
+        <span class="log-panel-title" id="formTitle">Log a Run</span>
+        <div class="shoe-indicator" id="shoeIndicator" style="display:none;">&#x1F45F; In: <span id="shoeIndicatorName"></span></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label for="fDate">Date</label><input type="date" id="fDate"></div>
+        <div class="field"><label for="fDist">Distance (miles)</label><input type="number" id="fDist" min="0" step="0.01" placeholder="3.10"></div>
+        <div class="field"><label for="fDuration">Duration (mm:ss or hh:mm:ss)</label><input type="text" id="fDuration" placeholder="28:30" maxlength="8"></div>
+        <div class="field"><label for="fType">Workout Type</label>
+          <select id="fType">
+            <option value="easy">Easy</option>
+            <option value="long">Long Run</option>
+            <option value="tempo">Tempo</option>
+            <option value="interval">Interval</option>
+            <option value="race">Race</option>
+            <option value="rest">Rest / Cross-Train</option>
+          </select>
+        </div>
+        <div class="field"><label for="fFeel">How&#8217;d it feel?</label>
+          <select id="fFeel">
+            <option value="great">&#128525; Great</option>
+            <option value="good" selected>&#128578; Good</option>
+            <option value="meh">&#128528; Meh</option>
+            <option value="tough">&#128553; Tough</option>
+            <option value="terrible">&#128169; Terrible</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Fuel Used (optional)</label>
+          <div class="fuel-entries" id="fuelEntries"></div>
+          <button class="btn btn-ghost btn-sm" style="align-self:flex-start;margin-top:4px;" onclick="addFuelRow()">+ Add Fuel</button>
+        </div>
+        <div class="field full"><label for="fNote">Notes (optional)</label><textarea id="fNote" placeholder="Weather, how you felt, route..."></textarea></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="logRunBtn" onclick="addRun()">Log Run</button>
+        <button class="btn btn-ghost" onclick="clearForm()">Clear</button>
+        <button class="gear-btn" onclick="openSettings()" title="Settings" style="margin-left:auto;">&#9881;</button>
+      </div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-panel-header">
+        <span class="log-panel-title">Run History</span>
+        <span id="entryCount" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+      <div class="entries-wrap"><div id="tableWrap"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- -- Run Detail Modal --------------------- -->
+<div class="modal-overlay" id="detailModal" style="display:none;" onclick="closeDetail(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="detailTitle">Run Detail</span>
+      <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+    </div>
+    <div id="detailBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="detailEditBtn">Edit Run</button>
+      <button class="btn btn-ghost" id="detailDelBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- -- Settings Modal ---------------------- -->
+<div class="modal-overlay" id="settingsModal" style="display:none;" onclick="closeSettingsOuter(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Settings</span>
+      <button class="modal-close" onclick="closeSettings()">&times;</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Shoes</div>
+      <div class="shoe-list" id="shoeList"></div>
+      <div class="add-row">
+        <input type="text" id="newShoeName" placeholder="e.g. Hoka Clifton 9" maxlength="50">
+        <button class="btn btn-primary btn-sm" onclick="addShoe()">Add</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Fuel Presets</div>
+      <div class="fuel-preset-list" id="fuelPresetList"></div>
+      <div class="add-row">
+        <input type="text" id="newFuelName" placeholder="e.g. GU Salted Caramel" maxlength="60">
+        <button class="btn btn-primary btn-sm" onclick="addFuelPreset()">Add</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:8px;">
+      <button class="btn btn-primary" onclick="closeSettings()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change plan confirm modal -->
+<div class="confirm-modal" id="confirmModal" style="display:none;">
+  <div class="confirm-box">
+    <div class="confirm-title">Change your plan?</div>
+    <div class="confirm-body">This will clear your active plan and all weekly adjustments. Your logged runs are kept.</div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="dismissConfirm()">Cancel</button>
+      <button class="confirm-ok" onclick="confirmChangePlan()">Yes, Change</button>
+    </div>
+  </div>
+</div>
+
+<!-- Post-run encouragement modal -->
+<div class="encourage-modal" id="encourageModal" style="display:none;">
+  <div class="encourage-box">
+    <div class="encourage-emoji" id="encourageEmoji"></div>
+    <div class="encourage-headline" id="encourageHeadline"></div>
+    <div class="encourage-body" id="encourageBody"></div>
+    <div class="encourage-stat" id="encourageStat" style="display:none;"></div>
+    <button class="encourage-dismiss" onclick="dismissEncourage()">Keep Going</button>
+  </div>
+</div>
+
+<script>
+// ========================================================
+// SHARED STATE & STORAGE
+// ========================================================
+var STORE_KEY    = 'appaday-051-runs';
+var SETTINGS_KEY = 'appaday-051-settings';
+var PLAN_KEY       = 'appaday-051-plan';
+var DATE_KEY       = 'appaday-051-startDate';
+var OVERRIDES_KEY  = 'appaday-051-overrides';  // { "weekIdx": [dayIndices...] }
+var WEEKS_KEY      = 'appaday-051-weeks';
+var RACE_DATE_KEY  = 'appaday-051-raceDate';
+
+var currentTab = 'plan';
+var chartRange = '12w';
+var chartType  = 'bar';
+var editingId  = null;
+var currentDetailId = null;
+var activePlan = null; // { racePace, easyPace, tempoPace, dist, label }
+
+function loadRuns()     { try { var r=localStorage.getItem(STORE_KEY); return r?JSON.parse(r):[]; } catch(e){ return []; } }
+function saveRuns(r)    { try { localStorage.setItem(STORE_KEY,JSON.stringify(r)); } catch(e){} }
+function loadSettings() { try { var s=localStorage.getItem(SETTINGS_KEY); return s?JSON.parse(s):{shoes:[],activeShoe:'',fuelPresets:[]}; } catch(e){ return {shoes:[],activeShoe:'',fuelPresets:[]}; } }
+function saveSettings(s){ try { localStorage.setItem(SETTINGS_KEY,JSON.stringify(s)); } catch(e){} }
+function loadPlan()     { try { var p=localStorage.getItem(PLAN_KEY); return p?JSON.parse(p):null; } catch(e){ return null; } }
+function savePlan(p)    { try { localStorage.setItem(PLAN_KEY,JSON.stringify(p)); } catch(e){} }
+function loadOverrides(){ try{ var o=localStorage.getItem(OVERRIDES_KEY); return o?JSON.parse(o):{}; }catch(e){ return {}; } }
+function saveOverrides(o){ try{ localStorage.setItem(OVERRIDES_KEY,JSON.stringify(o)); }catch(e){} }
+function clearOverrides(){ try{ localStorage.removeItem(OVERRIDES_KEY); }catch(e){} }
+function loadWeeks()    { try{ var w=localStorage.getItem(WEEKS_KEY); return w?JSON.parse(w):null; }catch(e){ return null; } }
+function saveWeeks(w)   { try{ localStorage.setItem(WEEKS_KEY,JSON.stringify(w)); }catch(e){} }
+function clearWeeks()   { try{ localStorage.removeItem(WEEKS_KEY); }catch(e){} }
+
+// ========================================================
+// TAB SWITCHING
+// ========================================================
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('panelPlan').classList.toggle('active', tab === 'plan');
+  document.getElementById('panelLog').classList.toggle('active',  tab === 'log');
+  document.getElementById('tabPlanBtn').classList.toggle('active', tab === 'plan');
+  document.getElementById('tabLogBtn').classList.toggle('active',  tab === 'log');
+  if (tab === 'log') {
+    try { var runs=loadRuns(); refreshLog(runs); } catch(e){}
+    try {
+      var sp=loadPlan(), sw=loadWeeks();
+      if(sp&&sw){
+        var sdStr2=sp.startDate||'';
+        if(!sdStr2){ try{ sdStr2=localStorage.getItem('appaday-051-startDate')||''; }catch(e){} }
+        renderTodayCard(sw, sdStr2);
+      }
+    } catch(e){}
+  }
+}
+
+// ========================================================
+// PACE STRIP
+// ========================================================
+function updatePaceStrip(plan) {
+  if (!plan) return;
+  activePlan = plan;
+  document.getElementById('stripGoalPace').textContent = formatPace(plan.racePace);
+  document.getElementById('stripEasyPace').textContent = formatPace(plan.easyPace);
+  document.getElementById('stripDist').textContent     = plan.label;
+  document.getElementById('paceStrip').classList.add('visible');
+}
+
+function getPaceCompare(loggedPacePerMile) {
+  if (!activePlan || !loggedPacePerMile) return null;
+  var diff = loggedPacePerMile - activePlan.racePace;
+  return diff; // positive = slower than goal, negative = faster
+}
+
+// ========================================================
+// PLAN TAB -- (Day 049 logic, adapted)
+// ========================================================
+var DISTANCES = {
+  '5k':       { label:'5K',            miles:3.10694, weeks:8,  peakMpw:25, taperWeeks:1 },
+  '10k':      { label:'10K',           miles:6.21371, weeks:10, peakMpw:30, taperWeeks:1 },
+  'half':     { label:'Half Marathon', miles:13.1094, weeks:12, peakMpw:40, taperWeeks:2 },
+  'marathon': { label:'Full Marathon', miles:26.2188, weeks:16, peakMpw:50, taperWeeks:3 },
+  '50k':      { label:'50K Ultra',     miles:31.0686, weeks:20, peakMpw:55, taperWeeks:3 },
+};
+
+var METHODS = {
+  balanced:    { title:'Balanced Method',              desc:'Rooted in Hal Higdon\'s approach: easy runs build aerobic base, one weekly tempo sharpens lactate threshold, and a progressive long run builds race-specific endurance. Ideal for most runners.' },
+  polarized:   { title:'80/20 Polarized (Fitzgerald)', desc:'Roughly 80% of runs at conversational easy pace, 20% at threshold or faster. Research shows polarized training produces better adaptation than moderate-intensity work for most athletes.' },
+  galloway:    { title:'Run-Walk Method (Galloway)',   desc:'Strategic walk breaks on long runs reduce injury risk and recovery time. Galloway\'s research shows run-walkers often finish with similar or better times while enjoying the experience more.' },
+  conservative:{ title:'Conservative / Injury Prevention', desc:'Lower weekly mileage increases of no more than 10% per week, extra rest days, and no speedwork until week 4. Best for runners returning from injury or with limited time to train.' },
+};
+
+var selectedDist = '5k';
+
+var MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function parseLocalDate(str) {
+  if (!str) return null;
+  var parts = str.split('-').map(Number);
+  return new Date(parts[0], parts[1]-1, parts[2]);
+}
+function addDaysPlan(date, n) { var d=new Date(date); d.setDate(d.getDate()+n); return d; }
+function fmtDate(date) { return MONTH_SHORT[date.getMonth()]+' '+date.getDate(); }
+function weekDateRange(idx, startDate) {
+  var mon=addDaysPlan(startDate,idx*7), sun=addDaysPlan(mon,6);
+  return { label: fmtDate(mon)+' \u2013 '+fmtDate(sun) };
+}
+function dayDateLabel(wIdx, dIdx, startDate) { return fmtDate(addDaysPlan(startDate, wIdx*7+dIdx)); }
+
+function totalSecs(h,m,s){ return h*3600+m*60+s; }
+function formatPace(spm){
+  if(!isFinite(spm)||spm<=0) return '--:--';
+  var m=Math.floor(spm/60), s=Math.round(spm%60);
+  return m+':'+(s<10?'0':'')+s;
+}
+function formatTime(ts){
+  var h=Math.floor(ts/3600), m=Math.floor((ts%3600)/60), s=Math.round(ts%60);
+  if(h>0) return h+'h '+m+'m'+(s>0?' '+s+'s':'');
+  return m+'m'+(s>0?' '+(s<10?'0':'')+s+'s':'');
+}
+
+function calcPaces(goalSecs, distMiles, fitness, style) {
+  var gpm = goalSecs/distMiles;
+  var adj = {beginner:1.0,novice:0.95,intermediate:0.9,advanced:0.85}[fitness]||1.0;
+  var eO,tO,lO;
+  if(style==='polarized')    { eO=90*adj; tO=-10; lO=75*adj; }
+  else if(style==='galloway'){ eO=75*adj; tO=5;   lO=90*adj; }
+  else if(style==='conservative'){ eO=105*adj; tO=10; lO=100*adj; }
+  else                        { eO=90*adj; tO=-15; lO=75*adj; }
+  return { race:gpm, easy:gpm+eO, tempo:gpm+tO, long:gpm+lO, interval:gpm-20 };
+}
+
+// ---- Schedule preference state ----
+var longRunDay = 5; // default Saturday (0=Mon...6=Sun)
+var daysOff = [];   // array of day indices that cannot have runs
+
+function generateWeeks(dist, fitness, style, paces, raceDayIdxOverride) {
+  var cfg=DISTANCES[dist], total=cfg.weeks, peak=cfg.peakMpw, taper=cfg.taperWeeks;
+  var build=total-taper-1;
+  var dpw=(fitness==='beginner'||style==='conservative')?4:(dist==='50k'?6:5);
+  var DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  function getPhase(w){ if(w<=Math.floor(build*0.4)) return 'Base Building'; if(w<=build) return 'Build Phase'; if(w<total) return 'Taper'; return 'Race Week'; }
+  function weekMiles(w){
+    var baseMpw=(fitness==='beginner')?peak*0.45:(fitness==='novice')?peak*0.55:peak*0.65;
+    if(w<=build){ var pct=w/build; var raw=baseMpw+(peak-baseMpw)*Math.pow(pct,0.85); return (w%4===0&&w<build)?Math.round(raw*0.8):Math.round(raw); }
+    var taperPct=[0.75,0.55,0.40][w-build-1]||0.35;
+    if(w===total) return Math.round(peak*0.30);
+    return Math.round(peak*taperPct);
+  }
+  function mkDay(type,miles,title,detail,pace){ return {type,miles,title,detail,pace}; }
+  function longRunDesc(mi,sty,p){ if(sty==='galloway') return mi+' mi with run/walk intervals (run 4 min, walk 1 min). Stay conversational.'; return mi+' mi easy. Aim for '+formatPace(p.long)+'/mi. Most important run of the week.'; }
+  function tempoDesc(mi,p){ var w=Math.max(1,Math.round(mi*0.25)),t=Math.round(mi*0.5); return 'Warm up '+w+' mi easy, '+t+' mi at '+formatPace(p.tempo)+'/mi, cool down '+w+' mi easy.'; }
+  function intervalDesc(wn,p){ var reps=Math.min(8,4+Math.floor(wn/3)); return reps+'x400m at '+formatPace(p.interval)+'/mi with 90s rest. Warm up and cool down 1 mi each.'; }
+  function easyDesc(mi,p,sty){ if(sty==='polarized') return mi+' mi fully conversational. If you can\'t speak in sentences, slow down.'; return mi+' mi at '+formatPace(p.easy)+'/mi. Effort: easy, controlled breathing.'; }
+
+  // Resolve which days are blocked. Long-run day cannot also be a day off.
+  var blocked = daysOff.filter(d=>d!==longRunDay);
+
+  // Find the closest available day to a preferred index, searching outward.
+  // direction: 1=forward, -1=backward, 0=try both
+  function nearestAvail(preferred, takenSet, excludeAlso) {
+    var excl = (excludeAlso||[]).concat(blocked);
+    if(!takenSet.has(preferred) && excl.indexOf(preferred)===-1) return preferred;
+    // search outward alternating
+    for(var delta=1; delta<=6; delta++){
+      var fwd=(preferred+delta)%7;
+      var bwd=(preferred-delta+7)%7;
+      if(!takenSet.has(fwd) && excl.indexOf(fwd)===-1) return fwd;
+      if(!takenSet.has(bwd) && excl.indexOf(bwd)===-1) return bwd;
+    }
+    return -1; // no slot available
+  }
+
+  return Array.from({length:total},(_,i)=>{
+    var w=i+1, miles=weekMiles(w), isTaper=w>build&&w<total, isRaceWk=w===total;
+
+    // Start with a blank 7-slot array
+    var slots = Array.from({length:7}, (_,di)=>({name:DAYS[di], type:'rest', miles:0, title:'Rest', detail:'', pace:0}));
+
+    // --- RACE WEEK: race lands on the actual race date's weekday ---
+    if(isRaceWk){
+      // Use the actual race date's day-of-week if provided, else fall back to longRunDay
+      var raceDay=(raceDayIdxOverride!==undefined)?raceDayIdxOverride:longRunDay;
+      slots[raceDay]=Object.assign({name:DAYS[raceDay]},mkDay('long',cfg.miles,'RACE DAY','All your training comes together today. Run your race.',paces.race));
+      var taken=new Set([raceDay]);
+      var d1=nearestAvail((raceDay-2+7)%7,taken,[]);
+      if(d1!==-1){ slots[d1]=Object.assign({name:DAYS[d1]},mkDay('easy',3,'Easy shakeout','Light 3 miles, keep it easy.',paces.easy)); taken.add(d1); }
+      var d2=nearestAvail((raceDay-1+7)%7,taken,[]);
+      if(d2!==-1){ slots[d2]=Object.assign({name:DAYS[d2]},mkDay('easy',2,'Pre-race shakeout','2 miles very easy, 4 strides.',paces.easy)); taken.add(d2); }
+      var d3=nearestAvail((raceDay+2)%7,taken,[]);
+      if(d3!==-1){ slots[d3]=Object.assign({name:DAYS[d3]},mkDay('easy',2,'Tune-up run','2 miles easy + 4x20s strides.',paces.easy)); taken.add(d3); }
+      return {week:w, miles, phase:getPhase(w), isTaper, isRaceWk, days:slots};
+    }
+
+    // --- Determine effective available days for running (not blocked) ---
+    var avail=[]; // indices 0-6 available for running
+    for(var di=0;di<7;di++){ if(blocked.indexOf(di)===-1) avail.push(di); }
+
+    // We need at least 2 available days (long run + 1 other)
+    if(avail.length<2){
+      // Just put long run on longRunDay, everything else rest
+      slots[longRunDay]=Object.assign({name:DAYS[longRunDay]},mkDay('long',miles,'Long Run',longRunDesc(miles,style,paces),paces.long));
+      return {week:w, miles, phase:getPhase(w), isTaper, isRaceWk, days:slots};
+    }
+
+    var taken=new Set();
+
+    // 1. LONG RUN -- anchor on preferred day (always available since blocked filter excludes longRunDay)
+    var longMiles=isTaper?Math.max(4,Math.round(miles*0.45)):Math.round(miles*(dist==='50k'?0.32:0.28));
+    slots[longRunDay]=Object.assign({name:DAYS[longRunDay]},
+      isTaper
+        ? mkDay('long',longMiles,'Taper long run','Keep it easy. This run reminds your legs, not builds them.',paces.long)
+        : mkDay('long',longMiles,'Long Run',longRunDesc(longMiles,style,paces),paces.long)
+    );
+    taken.add(longRunDay);
+
+    // 2. Mandatory rest: one day adjacent to (day before) long run if possible
+    var restPref=(longRunDay+1)%7; // day after long run preferred as rest
+    var restDay=nearestAvail(restPref,taken,[]);
+    if(restDay!==-1){
+      slots[restDay]=Object.assign({name:DAYS[restDay]},mkDay('rest',0,'Rest Day','Full rest or gentle walk only.',0));
+      taken.add(restDay);
+    }
+
+    // 3. Quality work (skip in taper/conservative, and beginner doesn't get intervals)
+    var droppedQualityMiles=0;
+    if(!isTaper){
+      // 3a. Interval -- prefer 2 days before long run
+      if(style!=='conservative'&&style!=='galloway'&&w>3&&fitness!=='beginner'){
+        var iMiles=Math.round(miles*0.12);
+        var iPref=(longRunDay-2+7)%7;
+        var iDay=nearestAvail(iPref,taken,[]);
+        if(iDay!==-1){
+          slots[iDay]=Object.assign({name:DAYS[iDay]},mkDay('interval',iMiles,'Interval Workout',intervalDesc(w,paces),paces.interval));
+          taken.add(iDay);
+        } else {
+          droppedQualityMiles+=iMiles; // can't place it; redistribute
+        }
+      }
+
+      // 3b. Tempo -- prefer 3 days before long run (different from interval slot)
+      if(w>2){
+        var tMiles=Math.round(miles*0.15);
+        var tPref=(longRunDay-3+7)%7;
+        var tDay=nearestAvail(tPref,taken,[]);
+        if(tDay!==-1){
+          slots[tDay]=Object.assign({name:DAYS[tDay]},mkDay('tempo',tMiles,'Tempo Run',tempoDesc(tMiles,paces),paces.tempo));
+          taken.add(tDay);
+        } else {
+          droppedQualityMiles+=tMiles;
+        }
+      }
+
+      // 3c. Cross-training -- prefer day between quality days and long run
+      if(dpw>=5){
+        var xPref=(longRunDay-1+7)%7;
+        var xDay=nearestAvail(xPref,taken,[]);
+        if(xDay!==-1 && blocked.indexOf(xDay)===-1){
+          slots[xDay]=Object.assign({name:DAYS[xDay]},mkDay('cross',0,'Cross-Training','Bike, swim, yoga, or strength. 30-45 min.',0));
+          taken.add(xDay);
+        }
+      }
+    } else {
+      // Taper: short tempo
+      if(w>2){
+        var ttPref=(longRunDay-3+7)%7;
+        var ttDay=nearestAvail(ttPref,taken,[]);
+        if(ttDay!==-1){
+          slots[ttDay]=Object.assign({name:DAYS[ttDay]},mkDay('tempo',Math.round(miles*0.15),'Short tempo','10 min warm-up, 10 min at goal pace, 10 min cool-down.',paces.tempo));
+          taken.add(ttDay);
+        }
+      }
+    }
+
+    // 4. Easy runs to fill remaining available slots up to dpw
+    // First, compute how many easy slots we want
+    var qualitySlots=taken.size; // long+rest+quality already placed
+    var targetRunDays=Math.min(dpw, avail.length);
+    var easyNeeded=Math.max(0, targetRunDays - qualitySlots);
+
+    // Determine available easy slots (not taken, not blocked, not long, not rest-after-long)
+    var easySlots=avail.filter(d=>!taken.has(d));
+
+    // Distribute easy mileage: remaining miles minus long and quality
+    var spentMiles=longMiles;
+    for(var di2=0;di2<7;di2++){
+      if(slots[di2].type!=='rest'&&slots[di2].type!=='cross'&&di2!==longRunDay){
+        spentMiles+=slots[di2].miles||0;
+      }
+    }
+    var remainingMiles=Math.max(0, miles-spentMiles + droppedQualityMiles);
+    var easyCount=Math.min(easyNeeded, easySlots.length);
+    // Spread remaining miles across easy slots; first slot gets slightly more
+    var easyPerRun=easyCount>0?Math.round(remainingMiles/easyCount):0;
+
+    // Sort easy slots: prefer days closer to midweek for balance
+    easySlots.sort((a,b)=>{
+      var midA=Math.abs(a-3), midB=Math.abs(b-3); return midA-midB;
+    });
+
+    var easyPlaced=0;
+    easySlots.forEach(function(di3){
+      if(easyPlaced>=easyCount) return;
+      var mi2=Math.max(2, easyPerRun);
+      slots[di3]=Object.assign({name:DAYS[di3]},mkDay('easy',mi2,'Easy Run',easyDesc(mi2,paces,style),paces.easy));
+      taken.add(di3);
+      easyPlaced++;
+    });
+
+    // Recalculate actual miles for this week (sum of all non-rest, non-cross slots)
+    var actualMiles=0;
+    for(var di4=0;di4<7;di4++){
+      if(slots[di4].type!=='rest'&&slots[di4].type!=='cross') actualMiles+=slots[di4].miles||0;
+    }
+
+    return {week:w, miles:actualMiles, targetMiles:miles, phase:getPhase(w), isTaper, isRaceWk, days:slots};
+  });
+}
+
+// ========================================================
+// WEEK OVERRIDE: apply one-off day-off to a generated week
+// blockedDays = array of day indices (0=Mon..6=Sun) to treat as rest this week
+// Returns a new days array with shift/redistribute applied, plus a summary of changes
+// ========================================================
+function applyWeekOverride(originalDays, blockedDays, paces, style) {
+  if(!blockedDays||blockedDays.length===0) return {days:originalDays, changes:[]};
+
+  // Deep-clone so we never mutate the original
+  var slots=originalDays.map(d=>Object.assign({},d));
+  var DAYS_NAMES=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var changes=[];
+
+  blockedDays.forEach(function(blockIdx){
+    var victim=slots[blockIdx];
+    if(!victim||victim.type==='rest'||victim.type==='cross') return; // already rest, nothing to do
+
+    var isLong=(victim.type==='long');
+    var isQuality=(victim.type==='tempo'||victim.type==='interval');
+    var victimMiles=victim.miles||0;
+
+    // Try to find an adjacent free slot to shift INTO
+    // Priority: day before, day after, then further out; never onto another blocked day
+    var searchOrder=[];
+    for(var delta=1;delta<=6;delta++){
+      searchOrder.push((blockIdx-delta+7)%7);
+      searchOrder.push((blockIdx+delta)%7);
+    }
+    var shiftTarget=-1;
+    for(var si=0;si<searchOrder.length;si++){
+      var ti=searchOrder[si];
+      if(blockedDays.indexOf(ti)!==-1) continue; // also blocked this week
+      if(slots[ti].type==='rest'||slots[ti].type==='cross'){
+        shiftTarget=ti;
+        break;
+      }
+    }
+
+    if(shiftTarget!==-1 && !isLong){
+      // Shift quality/easy workout to the free slot
+      var orig=Object.assign({},victim);
+      slots[shiftTarget]=Object.assign({},victim,{name:DAYS_NAMES[shiftTarget]});
+      slots[blockIdx]={name:DAYS_NAMES[blockIdx],type:'rest',miles:0,title:'Day Off',detail:'One-off rest day.',pace:0};
+      changes.push({from:DAYS_NAMES[blockIdx],to:DAYS_NAMES[shiftTarget],type:orig.type,action:'shifted'});
+    } else if(shiftTarget!==-1 && isLong){
+      // Long run can shift too if a free slot exists
+      var orig2=Object.assign({},victim);
+      slots[shiftTarget]=Object.assign({},victim,{name:DAYS_NAMES[shiftTarget]});
+      slots[blockIdx]={name:DAYS_NAMES[blockIdx],type:'rest',miles:0,title:'Day Off',detail:'One-off rest day.',pace:0};
+      changes.push({from:DAYS_NAMES[blockIdx],to:DAYS_NAMES[shiftTarget],type:orig2.type,action:'shifted'});
+    } else {
+      // Cannot shift -- redistribute mileage across remaining easy/available days
+      slots[blockIdx]={name:DAYS_NAMES[blockIdx],type:'rest',miles:0,title:'Day Off',detail:'One-off rest day. Mileage redistributed.',pace:0};
+      changes.push({from:DAYS_NAMES[blockIdx],to:null,type:victim.type,miles:victimMiles,action:'redistributed'});
+
+      if(victimMiles>0){
+        // Find easy-run days that aren't blocked and aren't rest
+        var recipients=slots.reduce(function(arr,s,i){
+          if(blockedDays.indexOf(i)===-1 && s.type==='easy' && i!==blockIdx) arr.push(i);
+          return arr;
+        },[]);
+        if(recipients.length>0){
+          var bonus=Math.round(victimMiles/recipients.length);
+          recipients.forEach(function(ri){
+            slots[ri]=Object.assign({},slots[ri],{
+              miles:(slots[ri].miles||0)+bonus,
+              redistributed:true
+            });
+          });
+        }
+      }
+    }
+  });
+
+  return {days:slots, changes:changes};
+}
+
+function drawMileageChart(weeks, maxMiles) {
+  var canvas=document.getElementById('mileageChart');
+  var wrap=canvas.parentElement;
+  var dpr=window.devicePixelRatio||1;
+  canvas.width=wrap.clientWidth*dpr; canvas.height=wrap.clientHeight*dpr;
+  canvas.style.width=wrap.clientWidth+'px'; canvas.style.height=wrap.clientHeight+'px';
+  var ctx=canvas.getContext('2d'); if(!ctx) return; ctx.scale(dpr,dpr);
+  var W=wrap.clientWidth, H=wrap.clientHeight;
+  var pad={top:10,right:10,bottom:24,left:32};
+  var iW=W-pad.left-pad.right, iH=H-pad.top-pad.bottom;
+  var data=weeks.map(wk=>wk.miles), n=data.length, step=iW/(n-1);
+  var grad=ctx.createLinearGradient(0,pad.top,0,pad.top+iH);
+  grad.addColorStop(0,'rgba(245,166,35,0.45)'); grad.addColorStop(1,'rgba(245,166,35,0.02)');
+  ctx.beginPath();
+  data.forEach((v,i)=>{ var x=pad.left+i*step, y=pad.top+iH-(v/maxMiles)*iH; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.lineTo(pad.left+(n-1)*step,pad.top+iH); ctx.lineTo(pad.left,pad.top+iH); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath();
+  data.forEach((v,i)=>{ var x=pad.left+i*step, y=pad.top+iH-(v/maxMiles)*iH; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.strokeStyle='#F5A623'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+  data.forEach((v,i)=>{ var x=pad.left+i*step, y=pad.top+iH-(v/maxMiles)*iH; ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fillStyle='#F5A623'; ctx.fill(); });
+  ctx.fillStyle='#7A8BA0'; ctx.font='10px Inter,sans-serif'; ctx.textAlign='center';
+  var step2=n<=12?2:4;
+  data.forEach((_,i)=>{ if((i+1)%step2===0||i===0||i===n-1){ ctx.fillText('W'+(i+1),pad.left+i*step,H-4); } });
+  ctx.textAlign='right'; ctx.fillText(maxMiles+' mi',pad.left-4,pad.top+10);
+}
+
+function renderPlan() {
+  var dist=selectedDist, cfg=DISTANCES[dist];
+  var h=parseInt(document.getElementById('hrs').value)||0;
+  var m=parseInt(document.getElementById('mins').value)||0;
+  var s=parseInt(document.getElementById('secs').value)||0;
+  var fitness=document.getElementById('fitness').value;
+  var style=document.getElementById('style').value;
+  // In race-date mode, derive start date from race date before reading
+  if(dateMode === 'race'){
+    var raceEl2 = document.getElementById('raceDate');
+    if(raceEl2 && raceEl2.value){
+      var derivedStart2 = calcStartFromRace(raceEl2.value, DISTANCES[dist].weeks);
+      if(derivedStart2) document.getElementById('startDate').value = derivedStart2;
+    }
+  }
+  var startDateStr=document.getElementById('startDate').value;
+  var startDate=parseLocalDate(startDateStr);
+  try{ localStorage.setItem(DATE_KEY,startDateStr); }catch(e){}
+
+  // Detect mid-week start: onrampDays = days from startDate until next Monday
+  var onrampDays = 0;
+  var effectiveStartDate = startDate;
+  if(startDate){
+    var sdow = startDate.getDay();
+    if(sdow !== 1){
+      onrampDays = (sdow === 0) ? 1 : (8 - sdow) % 7;
+      effectiveStartDate = addDaysPlan(startDate, onrampDays);
+    }
+  }
+
+  var gs=totalSecs(h,m,s);
+  if(gs<60){ alert('Please enter a valid goal time.'); return; }
+
+  // Read schedule prefs (already live in longRunDay/daysOff globals, but re-read from DOM to be safe)
+  var lrChip=document.querySelector('#longRunPicker .day-chip.selected');
+  if(lrChip) longRunDay=parseInt(lrChip.dataset.day);
+  // daysOff already maintained by pickers
+
+  // Determine the actual race day-of-week (plan index 0=Mon..6=Sun)
+  // Used so race week places the race on the correct weekday
+  var raceElVal = document.getElementById('raceDate') ? document.getElementById('raceDate').value : '';
+  var raceDayIdx = raceElVal ? raceDayIndex(raceElVal) : longRunDay;
+
+  var paces=calcPaces(gs,cfg.miles,fitness,style);
+  var weeks=generateWeeks(dist,fitness,style,paces,raceDayIdx);
+
+  // Build onramp week if start is mid-week
+  var allWeeks = weeks;
+  if(startDate && onrampDays > 0){
+    var DAYS_ALL=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var JS_TO_PLAN_MAP=[6,0,1,2,3,4,5];
+    var startDayPlanIdx = JS_TO_PLAN_MAP[startDate.getDay()];
+    var onrampSlots = Array.from({length:7}, function(_,di){
+      if(di < startDayPlanIdx){
+        // Before start date -- hidden
+        return {name:DAYS_ALL[di],type:'rest',miles:0,title:'',detail:'',pace:0,beforeStart:true};
+      }
+      // Onramp day: alternate easy/rest, no quality work
+      var delta = di - startDayPlanIdx;
+      var easyMi = Math.max(2, Math.round((weeks[0].miles||10)*0.12));
+      if(delta % 2 === 0){
+        return {name:DAYS_ALL[di],type:'easy',miles:easyMi,
+          title:'Easy Run',
+          detail:'Onramp run -- easy effort to bridge into Week 1. '+easyMi+' mi at comfortable pace.',
+          pace:paces.easy};
+      } else {
+        return {name:DAYS_ALL[di],type:'rest',miles:0,title:'Rest','detail':'Light rest day.',pace:0};
+      }
+    });
+    var onrampMiles = onrampSlots.reduce(function(s,d){ return d.type==='easy'?s+(d.miles||0):s; },0);
+    var onrampWeek = {week:0,miles:onrampMiles,targetMiles:onrampMiles,
+      phase:'Onramp',isOnramp:true,isTaper:false,isRaceWk:false,days:onrampSlots};
+    allWeeks = [onrampWeek].concat(weeks.map(function(wk,i){
+      return Object.assign({},wk,{week:i+1});
+    }));
+  }
+
+  // ---- BASE TRAINING: fill gap if plan starts in the future ---------------
+  var displayStartStr = startDateStr;
+  var baseWeekCount = 0;
+  if(startDate){
+    var todayForBase = new Date();
+    todayForBase.setHours(0,0,0,0);
+    var todayDow = todayForBase.getDay();
+    var toThisMon = (todayDow === 0) ? -6 : (1 - todayDow);
+    var thisMonday = new Date(todayForBase.getTime());
+    thisMonday.setDate(thisMonday.getDate() + toThisMon);
+    var planWeek1Mon = effectiveStartDate ? effectiveStartDate : startDate;
+    var gapMs = planWeek1Mon.getTime() - thisMonday.getTime();
+    var gapWeeks = Math.round(gapMs / (7*24*60*60*1000));
+    if(gapWeeks > 0){
+      baseWeekCount = gapWeeks;
+      var DAYS_B=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      var week1Miles = weeks[0] ? (weeks[0].miles||15) : 15;
+      var baseStart = Math.max(8, Math.round(week1Miles*0.55));
+      var baseWeeksArr = Array.from({length:gapWeeks}, function(_,bi){
+        var pct = gapWeeks>1 ? bi/(gapWeeks-1) : 1;
+        var targetMi = Math.round(baseStart + (week1Miles*0.9 - baseStart)*pct);
+        var bSlots = Array.from({length:7}, function(_2,di){
+          if(blocked.indexOf(di)!==-1){
+            return {name:DAYS_B[di],type:'rest',miles:0,title:'Rest',detail:'',pace:0};
+          }
+          if(di===longRunDay){
+            var lmi=Math.max(3,Math.round(targetMi*0.30));
+            return {name:DAYS_B[di],type:'easy',miles:lmi,title:'Base Long Run',
+              detail:'Easy aerobic effort. '+lmi+' mi at conversational pace -- building base before structured training.',
+              pace:paces.easy};
+          }
+          if(di===(longRunDay+1)%7){
+            return {name:DAYS_B[di],type:'rest',miles:0,title:'Rest Day',detail:'Recovery.',pace:0};
+          }
+          var runDays=[0,2,4];
+          if(runDays.indexOf(di)!==-1){
+            var rmi=Math.max(2,Math.round(targetMi*0.18));
+            return {name:DAYS_B[di],type:'easy',miles:rmi,title:'Easy Run',
+              detail:'Base training -- easy effort. '+rmi+' mi to maintain aerobic fitness.',
+              pace:paces.easy};
+          }
+          return {name:DAYS_B[di],type:'rest',miles:0,title:'Rest',detail:'',pace:0};
+        });
+        var bMiles=bSlots.reduce(function(s,d){ return d.type==='easy'?s+(d.miles||0):s; },0);
+        var bMon=new Date(thisMonday.getTime());
+        bMon.setDate(bMon.getDate()+bi*7);
+        var bmm=bMon.getMonth()+1, bdd=bMon.getDate();
+        var bISO=bMon.getFullYear()+'-'+(bmm<10?'0':'')+bmm+'-'+(bdd<10?'0':'')+bdd;
+        return {week:-(gapWeeks-bi),miles:bMiles,targetMiles:bMiles,
+          phase:'Base Training',isBase:true,isTaper:false,isRaceWk:false,isOnramp:false,
+          days:bSlots,weekMonISO:bISO};
+      });
+      var dmm=thisMonday.getMonth()+1, ddd=thisMonday.getDate();
+      displayStartStr=thisMonday.getFullYear()+'-'+(dmm<10?'0':'')+dmm+'-'+(ddd<10?'0':'')+ddd;
+      allWeeks = baseWeeksArr.concat(allWeeks);
+    }
+  }
+  // ---- END BASE TRAINING ------------------------------------------------
+
+  var maxMpw = Math.max.apply(null, allWeeks.filter(function(w){return !w.isOnramp&&!w.isBase;}).map(function(w){return w.miles;}));
+  if(!maxMpw||maxMpw===0) maxMpw=Math.max.apply(null,allWeeks.map(function(w){return w.miles||0;}));
+
+  // Save plan summary for pace strip and full weeks for today lookup
+  var planData={ racePace:paces.race, easyPace:paces.easy, tempoPace:paces.tempo, dist:dist, label:cfg.label, startDate:displayStartStr };
+  savePlan(planData);
+  saveWeeks(allWeeks);
+  updatePaceStrip(planData);
+  renderTodayCard(allWeeks, displayStartStr);
+
+  document.getElementById('emptyState').style.display='none';
+
+  var ph=document.getElementById('planHeader');
+  ph.classList.add('visible');
+  document.getElementById('planTitle').textContent=cfg.label+' Training Plan';
+  var planLabel = cfg.weeks+'-week'+(onrampDays>0?' + onramp':'')+(baseWeekCount>0?' ('+baseWeekCount+' base wk'+(baseWeekCount>1?'s':'')+ ' prepended)':'');
+  document.getElementById('planSubtitle').textContent=
+    planLabel+' plan \u00b7 Goal: '+formatTime(gs)+' \u00b7 '+METHODS[style].title+
+    (startDate?' \u00b7 Starts '+fmtDate(startDate):'');
+
+  var mc=document.getElementById('methodCard');
+  mc.classList.add('visible');
+  document.getElementById('methodTitle').textContent=METHODS[style].title;
+  document.getElementById('methodDesc').textContent=METHODS[style].desc;
+
+  var pg=document.getElementById('paceGrid'); pg.innerHTML='';
+  [{label:'Goal Pace',value:formatPace(paces.race),unit:'min/mile'},
+   {label:'Easy Pace',value:formatPace(paces.easy),unit:'min/mile'},
+   {label:'Tempo Pace',value:formatPace(paces.tempo),unit:'min/mile'},
+   {label:'Long Run Pace',value:formatPace(paces.long),unit:'min/mile'},
+   {label:'Interval Pace',value:formatPace(paces.interval),unit:'min/mile'},
+   {label:'Peak Mileage',value:maxMpw,unit:'miles/week'}
+  ].forEach(p=>{
+    var card=document.createElement('div'); card.className='pace-card';
+    card.innerHTML='<div class="pace-card-label">'+p.label+'</div><div class="pace-card-value">'+p.value+'</div><div class="pace-card-unit">'+p.unit+'</div>';
+    pg.appendChild(card);
+  });
+
+  var cw=document.getElementById('chartWrap'); cw.classList.add('visible');
+  requestAnimationFrame(function(){
+    drawMileageChart(allWeeks.filter(function(w){return !w.isOnramp&&!w.isBase;}), maxMpw);
+  });
+
+  var ww=document.getElementById('weeksWrap'); ww.innerHTML=''; ww.classList.add('visible');
+  ww.classList.add('plan-active');
+  var overrides=loadOverrides();
+  var cachedWeeks=allWeeks;
+  var cachedPaces=paces;
+  var cachedStyle=style;
+  var cachedStartDate=parseLocalDate(displayStartStr);
+  var cachedBaseWeekCount=baseWeekCount;
+
+  function renderWeekCard(wk,idx,overrideDays){
+    var card=document.createElement('div'); card.className='week-card';
+    if(idx===0) card.classList.add('open');
+
+    // Apply override if present
+    var displayDays=wk.days;
+    var overrideChanges=[];
+    if(overrideDays&&overrideDays.length>0&&!wk.isRaceWk){
+      var result=applyWeekOverride(wk.days,overrideDays,cachedPaces,cachedStyle);
+      displayDays=result.days;
+      overrideChanges=result.changes;
+    }
+
+    var displayMiles=displayDays.reduce(function(s,d){ return (d.type!=='rest'&&d.type!=='cross')?s+(d.miles||0):s; },0);
+
+    var taperBadge=(wk.isTaper||wk.isRaceWk)
+      ?'<span class="taper-badge">'+(wk.isRaceWk?'Race Week':'Taper')+'</span>':'';
+    var onrampBadge=wk.isOnramp
+      ?'<span class="taper-badge" style="background:rgba(59,130,246,0.12);color:var(--blue);border-color:rgba(59,130,246,0.3);">Onramp</span>':'';
+    var baseBadge=wk.isBase
+      ?'<span class="taper-badge" style="background:rgba(16,185,129,0.12);color:var(--green);border-color:rgba(16,185,129,0.3);">Base</span>':'';
+    var overrideBadge=overrideChanges.length>0?'<span class="override-badge">Adjusted</span>':'';
+    var dateRange=null;
+    if(wk.weekMonISO){
+      var bMon2=parseLocalDate(wk.weekMonISO);
+      if(bMon2) dateRange=weekDateRange(0,bMon2);
+    } else if(cachedStartDate && !wk.isBase){
+      dateRange=weekDateRange(idx,cachedStartDate);
+    }
+    var weekDateLbl=dateRange?'<div class="week-dates">'+dateRange.label+'</div>':'';
+    var barPct=Math.round((displayMiles/maxMpw)*100);
+
+    var dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var overrideDaysCurrent=overrideDays||[];
+
+    var dayRowsHtml=displayDays.map(function(d,di){
+      if(d.beforeStart) return '';
+      var isRest=d.type==='rest';
+      var dateLbl=cachedStartDate?'<div class="day-date-lbl">'+dayDateLabel(idx,di,cachedStartDate)+'</div>':'';
+      var dayBadge='';
+      overrideChanges.forEach(function(ch){
+        if(ch.action==='shifted'&&ch.to===d.name) dayBadge='<span class="shifted-badge">Moved here</span>';
+        if(ch.from===d.name&&ch.action==='redistributed') dayBadge='<span class="override-badge">Day Off</span>';
+        if(ch.from===d.name&&ch.action==='shifted') dayBadge='<span class="override-badge">Day Off</span>';
+      });
+      if(d.redistributed) dayBadge+='<span class="shifted-badge">+mi</span>';
+      return '<div class="day-row">'+
+        '<div class="day-name">'+d.name+(dateLbl?'<br>'+dateLbl:'')+'</div>'+
+        '<div class="day-dot '+(isRest?'rest':d.type)+'"></div>'+
+        '<div class="day-desc"><div class="day-title">'+d.title+dayBadge+'</div>'+(d.detail?'<div class="day-detail">'+d.detail+'</div>':'')+'</div>'+
+        '<div class="day-miles'+(isRest?' rest-miles':'')+'">'+((d.type==='rest')?'Rest':(d.miles>0?d.miles+' mi':''))+'</div>'+
+      '</div>';
+    }).join('');
+
+    var overridePanelHtml=(wk.isRaceWk||wk.isOnramp||wk.isBase)?'':(
+      '<div class="week-override-panel" id="op-'+idx+'">'+
+        '<div class="override-label">One-off day off this week</div>'+
+        '<div class="override-hint">Tap a day to mark it unavailable. Runs will shift to a free slot or mileage redistributes.</div>'+
+        '<div class="override-day-row" id="odr-'+idx+'">'+
+          dayNames.map(function(dn,di){
+            var isOff=overrideDaysCurrent.indexOf(di)!==-1;
+            var isLocked=(daysOff.indexOf(di)!==-1)||(di===longRunDay);
+            return '<div class="override-chip'+(isOff?' off':'')+(isLocked?' locked':'')+'" data-wi="'+idx+'" data-di="'+di+'" data-locked="'+isLocked+'">'+dn+'</div>';
+          }).join('')+
+        '</div>'+
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+          '<button class="override-apply-btn" data-wi="'+idx+'">Apply</button>'+
+          (overrideDaysCurrent.length>0?'<button class="override-clear-btn" data-wi="'+idx+'">Clear</button>':'')+
+        '</div>'+
+      '</div>'
+    );
+
+    card.innerHTML=
+      '<div class="week-header">'+
+        '<div class="week-left">'+
+          '<div class="week-num">Week '+wk.week+'</div>'+
+          '<div class="week-phase">'+wk.phase+taperBadge+onrampBadge+baseBadge+overrideBadge+weekDateLbl+'</div>'+
+        '</div>'+
+        '<div class="week-right">'+
+          '<div class="week-miles">'+displayMiles+' <span>mi</span></div>'+
+          ((wk.isRaceWk||wk.isOnramp||wk.isBase)?'':'<button class="week-override-btn" data-wi="'+idx+'">+ Day Off</button>')+
+          '<div class="week-chevron">&#9660;</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="week-bar-wrap"><div class="week-bar-track"><div class="week-bar-fill" style="width:'+barPct+'%"></div></div></div>'+
+      '<div class="week-days">'+dayRowsHtml+'</div>'+
+      overridePanelHtml;
+
+    card.querySelector('.week-header').addEventListener('click',function(e){
+      if(e.target.closest('.week-override-btn')) return;
+      card.classList.toggle('open');
+    });
+
+    var oBtn=card.querySelector('.week-override-btn');
+    if(oBtn) oBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var panel=document.getElementById('op-'+idx);
+      if(panel) panel.classList.toggle('open');
+      if(!card.classList.contains('open')) card.classList.add('open');
+    });
+
+    card.querySelectorAll('.override-chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        if(chip.dataset.locked==='true') return;
+        chip.classList.toggle('off');
+      });
+    });
+
+    var applyBtn=card.querySelector('.override-apply-btn');
+    if(applyBtn) applyBtn.addEventListener('click',function(){
+      var wi=parseInt(applyBtn.dataset.wi);
+      var selectedOff=[];
+      card.querySelectorAll('.override-chip.off').forEach(function(chip){
+        selectedOff.push(parseInt(chip.dataset.di));
+      });
+      var ov=loadOverrides();
+      if(selectedOff.length===0){ delete ov[wi]; } else { ov[wi]=selectedOff; }
+      saveOverrides(ov);
+      var newCard=renderWeekCard(cachedWeeks[wi],wi,selectedOff.length>0?selectedOff:null);
+      newCard.classList.add('open');
+      var panel2=newCard.querySelector('.week-override-panel');
+      if(panel2) panel2.classList.add('open');
+      ww.replaceChild(newCard,card);
+    });
+
+    var clearBtn=card.querySelector('.override-clear-btn');
+    if(clearBtn) clearBtn.addEventListener('click',function(){
+      var wi=parseInt(clearBtn.dataset.wi);
+      var ov=loadOverrides(); delete ov[wi]; saveOverrides(ov);
+      var newCard=renderWeekCard(cachedWeeks[wi],wi,null);
+      newCard.classList.add('open');
+      ww.replaceChild(newCard,card);
+    });
+
+    return card;
+  }
+
+  allWeeks.forEach(function(wk,idx){
+    var overrideDays=overrides[idx]||null;
+    var card=renderWeekCard(wk,idx,overrideDays);
+    ww.appendChild(card);
+  });
+
+  document.getElementById('planFooter').classList.add('visible');
+  // Lock the plan inputs now that a plan is active
+  lockPlan();
+  if(window.innerWidth<=800){ document.getElementById('panelRight').scrollIntoView({behavior:'smooth'}); }
+}
+
+// Distance buttons
+// ---- Schedule pickers ----
+(function(){
+  // Long run day picker (single select)
+  document.querySelectorAll('#longRunPicker .day-chip').forEach(chip=>{
+    chip.addEventListener('click',function(){
+      var day=parseInt(chip.dataset.day);
+      // Cannot pick a day that is in daysOff
+      if(daysOff.indexOf(day)!==-1) return;
+      document.querySelectorAll('#longRunPicker .day-chip').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      longRunDay=day;
+      updateDaysOffHighlight();
+    });
+  });
+
+  // Days-off picker (multi-toggle)
+  document.querySelectorAll('#daysOffPicker .day-chip').forEach(chip=>{
+    chip.addEventListener('click',function(){
+      var day=parseInt(chip.dataset.day);
+      // Cannot block the long-run day
+      if(day===longRunDay) return;
+      var idx=daysOff.indexOf(day);
+      if(idx===-1){ daysOff.push(day); chip.classList.add('selected','disabled-day'); }
+      else { daysOff.splice(idx,1); chip.classList.remove('selected','disabled-day'); }
+      updateDaysOffHint();
+    });
+  });
+})();
+
+function updateDaysOffHighlight(){
+  // Dim the long-run day chip in daysOffPicker so user knows it can't be blocked
+  var DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  document.querySelectorAll('#daysOffPicker .day-chip').forEach(chip=>{
+    var day=parseInt(chip.dataset.day);
+    if(day===longRunDay){
+      chip.style.opacity='0.35';
+      chip.title=DAYS[day]+' is your long run day and cannot be blocked';
+    } else {
+      chip.style.opacity='';
+      chip.title='';
+    }
+  });
+  // Also mark long-run day chip in longRunPicker with blocked days dimmed
+  document.querySelectorAll('#longRunPicker .day-chip').forEach(chip=>{
+    var day=parseInt(chip.dataset.day);
+    if(daysOff.indexOf(day)!==-1){
+      chip.style.opacity='0.35';
+      chip.title='This day is blocked as a day off';
+    } else {
+      chip.style.opacity='';
+      chip.title='';
+    }
+  });
+}
+
+function updateDaysOffHint(){
+  var DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var hint=document.getElementById('daysOffHint');
+  if(daysOff.length===0){
+    hint.textContent='Tap days you can never run. Runs will shift or mileage will redistribute.';
+  } else if(daysOff.length>=5){
+    hint.textContent='Warning: too few running days. Consider unblocking some days.';
+    hint.style.color='var(--red)';
+  } else {
+    hint.textContent='Blocked: '+daysOff.sort((a,b)=>a-b).map(d=>DAYS[d]).join(', ')+'. Plan will work around these.';
+    hint.style.color='';
+  }
+}
+
+// Init highlight on load
+updateDaysOffHighlight();
+
+document.querySelectorAll('.dist-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.dist-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedDist=btn.dataset.dist;
+    var defaults={'5k':{h:0,m:25,s:0},'10k':{h:0,m:55,s:0},'half':{h:2,m:0,s:0},'marathon':{h:4,m:0,s:0},'50k':{h:5,m:30,s:0}};
+    var d=defaults[selectedDist];
+    document.getElementById('hrs').value=d.h; document.getElementById('mins').value=d.m; document.getElementById('secs').value=d.s;
+    updateGoalHint();
+    updateDateHints();
+  });
+});
+
+function updateGoalHint(){
+  var h=parseInt(document.getElementById('hrs').value)||0;
+  var m=parseInt(document.getElementById('mins').value)||0;
+  var s=parseInt(document.getElementById('secs').value)||0;
+  var cfg=DISTANCES[selectedDist], ts=h*3600+m*60+s;
+  var hint=document.getElementById('goalHint');
+  hint.textContent=ts>0?'Goal: '+formatTime(ts)+' \u2014 '+formatPace(ts/cfg.miles)+'/mile avg':'Enter your goal finish time above';
+}
+['hrs','mins','secs'].forEach(id=>document.getElementById(id).addEventListener('input',updateGoalHint));
+document.getElementById('generateBtn').addEventListener('click',renderPlan);
+
+// ---- Date mode ----
+var dateMode = 'start';
+
+function setDateMode(mode){
+  dateMode = mode;
+  document.getElementById('modeBtnStart').classList.toggle('active', mode==='start');
+  document.getElementById('modeBtnRace').classList.toggle('active', mode==='race');
+  document.getElementById('startDateWrap').classList.toggle('visible', mode==='start');
+  document.getElementById('raceDateWrap').classList.toggle('visible', mode==='race');
+  updateDateHints();
+}
+
+function calcStartFromRace(raceDateStr, numWeeks){
+  var raceDate = parseLocalDate(raceDateStr);
+  if(!raceDate) return '';
+  // Find the Monday of race week: go back to the Monday on or before race date
+  var dow = raceDate.getDay(); // 0=Sun, 1=Mon...
+  var toMon = (dow === 0) ? -6 : (1 - dow);
+  var raceWeekMon = new Date(raceDate.getTime());
+  raceWeekMon.setDate(raceWeekMon.getDate() + toMon);
+  // Plan Week 1 Monday is (numWeeks - 1) weeks before race week Monday
+  var startMon = new Date(raceWeekMon.getTime());
+  startMon.setDate(startMon.getDate() - (numWeeks - 1) * 7);
+  var mm = startMon.getMonth()+1, dd = startMon.getDate();
+  return startMon.getFullYear()+'-'+(mm<10?'0':'')+mm+'-'+(dd<10?'0':'')+dd;
+}
+
+// Given a race date string, return its 0=Mon..6=Sun plan day index
+function raceDayIndex(raceDateStr){
+  var d = parseLocalDate(raceDateStr);
+  if(!d) return longRunDay;
+  var JS_TO_PLAN = [6,0,1,2,3,4,5]; // JS 0=Sun->6, 1=Mon->0 ...
+  return JS_TO_PLAN[d.getDay()];
+}
+
+function updateDateHints(){
+  var cfg = DISTANCES[selectedDist];
+  var numWeeks = cfg ? cfg.weeks : 12;
+  var startVal = document.getElementById('startDate').value;
+  var raceEl   = document.getElementById('raceDate');
+  var raceVal  = raceEl ? raceEl.value : '';
+  var startHint = document.getElementById('startDateHint');
+  var raceHint  = document.getElementById('raceDateHint');
+  var winHint   = document.getElementById('planWindowHint');
+
+  if(dateMode === 'race'){
+    if(raceVal){
+      var derived = calcStartFromRace(raceVal, numWeeks);
+      if(derived){
+        document.getElementById('startDate').value = derived;
+        var ds = parseLocalDate(derived);
+        var raceD = parseLocalDate(raceVal);
+      var DNAMES_HINT = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var raceDayName = raceD ? DNAMES_HINT[raceD.getDay()] : '';
+      raceHint.textContent = 'Training starts ' + fmtDate(ds) + ' -- ' + numWeeks + ' weeks out. Race falls on a ' + raceDayName + '.';
+        winHint.textContent = '';
+      }
+    } else {
+      raceHint.textContent = 'Pick your race date and we will set the start automatically.';
+      winHint.textContent = '';
+    }
+  } else {
+    // start-date mode
+    if(startVal){
+      var sd = parseLocalDate(startVal);
+      var dow = sd.getDay();
+      if(dow !== 1){
+        startHint.textContent = 'Non-Monday start: a short onramp week will bridge to Week 1.';
+      } else {
+        startHint.textContent = 'Plan begins ' + fmtDate(sd) + '.';
+      }
+    } else {
+      startHint.textContent = 'Your plan will run from this date forward.';
+    }
+    winHint.textContent = '';
+  }
+}
+
+function updateStartDateHint(){ updateDateHints(); }
+
+(function initStartDate(){
+  try{
+    var savedRace = localStorage.getItem(RACE_DATE_KEY)||'';
+    var savedStart = localStorage.getItem(DATE_KEY)||'';
+    if(savedRace){
+      document.getElementById('raceDate').value = savedRace;
+      setDateMode('race');
+    }
+    if(savedStart) document.getElementById('startDate').value = savedStart;
+  }catch(e){}
+  updateDateHints();
+})();
+
+document.getElementById('startDate').addEventListener('change', function(){
+  try{ localStorage.setItem(DATE_KEY, document.getElementById('startDate').value); }catch(e){}
+  updateDateHints();
+});
+document.getElementById('raceDate').addEventListener('change', function(){
+  var rv = document.getElementById('raceDate').value;
+  try{ localStorage.setItem(RACE_DATE_KEY, rv); }catch(e){}
+  updateDateHints();
+});
+updateGoalHint();
+
+// ========================================================
+// LOG TAB -- (Day 050 logic, adapted)
+// ========================================================
+var FEEL_MAP = { great:'\uD83D\uDE0D', good:'\uD83D\uDE42', meh:'\uD83D\uDE10', tough:'\uD83D\uDE29', terrible:'\uD83D\uDCA9' };
+
+function resolveFeel(val){
+  if(!val) return '\u2014';
+  if(FEEL_MAP[val]) return FEEL_MAP[val];
+  return val;
+}
+
+function pad(n){ return n<10?'0'+n:''+n; }
+function parseDuration(str){
+  if(!str||!str.trim()) return null;
+  var parts=str.trim().split(':').map(Number);
+  if(parts.some(isNaN)) return null;
+  if(parts.length===2) return parts[0]*60+parts[1];
+  if(parts.length===3) return parts[0]*3600+parts[1]*60+parts[2];
+  return null;
+}
+function fmtDuration(secs){ if(!secs) return '\u2014'; var h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60),s=secs%60; return h>0?h+':'+pad(m)+':'+pad(s):m+':'+pad(s); }
+function calcPaceLog(dist,secs){ if(!dist||!secs||dist===0) return null; return Math.round(secs/dist); }
+function fmtPace(spm){ if(!spm) return '\u2014'; return Math.floor(spm/60)+':'+pad(spm%60)+'/mi'; }
+function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function weekStartISO(iso){ var d=new Date(iso+'T00:00:00'); var diff=d.getDay()===0?-6:1-d.getDay(); d.setDate(d.getDate()+diff); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function addDaysISO(iso,n){ var d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fmtDateShort(iso){ var d=new Date(iso+'T00:00:00'); return (d.getMonth()+1)+'/'+d.getDate(); }
+function fmtDateFull(iso){ var d=new Date(iso+'T00:00:00'); var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']; var months=['January','February','March','April','May','June','July','August','September','October','November','December']; return days[d.getDay()]+', '+months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); }
+function pillClass(t){ return 'pill-'+t; }
+function pillLabel(t){ return {easy:'Easy',long:'Long',tempo:'Tempo',interval:'Interval',race:'Race',rest:'Rest'}[t]||t; }
+function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escQ(str){ return String(str||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function setChartRange(r){
+  chartRange=r;
+  var map={'1w':'btn1w','2w':'btn2w','4w':'btn4w','12w':'btn12w','26w':'btn26w','all':'btnAll'};
+  Object.values(map).forEach(function(id){ document.getElementById(id).classList.remove('active'); });
+  document.getElementById(map[r]).classList.add('active');
+  drawLogChart(loadRuns());
+}
+function setChartType(t){
+  chartType=t;
+  ['btnBar','btnLine'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(t==='bar'?'btnBar':'btnLine').classList.add('active');
+  drawLogChart(loadRuns());
+}
+
+function updateStats(runs){
+  var total=0, wSecs=0, tDist=0;
+  var today=todayISO(), ws=weekStartISO(today), we=addDaysISO(ws,6), weekMiles=0;
+  runs.forEach(function(r){
+    var dist=parseFloat(r.dist)||0; total+=dist;
+    if(r.date>=ws&&r.date<=we) weekMiles+=dist;
+    if(r.secs&&dist>0){ wSecs+=r.secs; tDist+=dist; }
+  });
+  document.getElementById('statTotal').textContent=total.toFixed(1);
+  document.getElementById('statRuns').textContent=runs.filter(r=>r.type!=='rest').length;
+  document.getElementById('statWeek').textContent=weekMiles.toFixed(1);
+  var avgP=tDist>0?calcPaceLog(tDist,wSecs):null;
+  document.getElementById('statAvgPace').textContent=avgP?fmtPace(avgP):'\u2014';
+}
+
+function updateWeekDots(runs){
+  var today=todayISO(), ws=weekStartISO(today);
+  var days=['Mo','Tu','We','Th','Fr','Sa','Su'];
+  var grid=document.getElementById('weekGrid'); grid.innerHTML='';
+  for(var i=0;i<7;i++){
+    var iso=addDaysISO(ws,i);
+    var miles=runs.filter(r=>r.date===iso&&r.type!=='rest').reduce((a,r)=>a+(parseFloat(r.dist)||0),0);
+    var cell=document.createElement('div'); cell.className='day-cell';
+    var nm=document.createElement('div'); nm.className='day-cell-name'; nm.textContent=days[i];
+    var dot=document.createElement('div');
+    dot.className='day-dot-log'+(miles>0?' has-run':'')+(iso===today?' today':'');
+    dot.textContent=miles>0?miles.toFixed(0):'\u2014';
+    var dl=document.createElement('div'); dl.className='day-dist-log'; dl.textContent=miles>0?miles.toFixed(1)+'mi':'';
+    cell.appendChild(nm); cell.appendChild(dot); cell.appendChild(dl);
+    grid.appendChild(cell);
+  }
+}
+
+var TYPE_INTENSITY={ race:5,interval:4,tempo:3,long:2,easy:1,rest:0 };
+var TYPE_COLOR={
+  race:    {hi:'rgba(168,85,247,0.9)',   lo:'rgba(168,85,247,0.3)',  line:'#a855f7', hex:'#a855f7'},
+  interval:{hi:'rgba(239,68,68,0.9)',    lo:'rgba(239,68,68,0.3)',   line:'#ef4444', hex:'#ef4444'},
+  tempo:   {hi:'rgba(245,166,35,0.9)',   lo:'rgba(245,166,35,0.3)',  line:'#F5A623', hex:'#F5A623'},
+  long:    {hi:'rgba(59,130,246,0.85)',  lo:'rgba(59,130,246,0.25)', line:'#3b82f6', hex:'#3b82f6'},
+  easy:    {hi:'rgba(16,185,129,0.85)',  lo:'rgba(16,185,129,0.25)', line:'#10b981', hex:'#10b981'},
+  rest:    {hi:'rgba(122,139,160,0.5)',  lo:'rgba(122,139,160,0.1)', line:'#7A8BA0', hex:'#7A8BA0'},
+};
+var DEFAULT_COLOR={hi:'rgba(59,130,246,0.85)',lo:'rgba(59,130,246,0.25)',line:'#3b82f6',hex:'#3b82f6'};
+
+function dominantType(rs){ if(!rs.length) return null; return rs.reduce((b,r)=>(TYPE_INTENSITY[r.type]||0)>(TYPE_INTENSITY[b.type]||0)?r:b).type; }
+function typeColor(t){ return TYPE_COLOR[t]||DEFAULT_COLOR; }
+
+function buildDayBuckets(runs,today){
+  var numDays=chartRange==='1w'?7:chartRange==='2w'?14:28;
+  var startIso=addDaysISO(today,-(numDays-1));
+  return Array.from({length:numDays},(_,i)=>{
+    var iso=addDaysISO(startIso,i);
+    var dayRuns=runs.filter(r=>r.date===iso);
+    var actRuns=dayRuns.filter(r=>r.type!=='rest');
+    var miles=actRuns.reduce((a,r)=>a+(parseFloat(r.dist)||0),0);
+    return {iso,miles,domType:dominantType(dayRuns)};
+  });
+}
+
+function buildWeekBuckets(runs,today){
+  var ws=weekStartISO(today), numWeeks;
+  if(chartRange==='12w') numWeeks=12;
+  else if(chartRange==='26w') numWeeks=26;
+  else {
+    if(runs.length===0) numWeeks=8;
+    else { var earliest=runs.reduce((m,r)=>r.date<m?r.date:m,runs[0].date); var ews=weekStartISO(earliest),n=0,cur=ews; while(cur<=ws){n++;cur=addDaysISO(cur,7);} numWeeks=Math.max(n,1); }
+  }
+  var buckets=[];
+  for(var i=numWeeks-1;i>=0;i--){
+    var wStart=addDaysISO(ws,-i*7), wEnd=addDaysISO(wStart,6);
+    var weekRuns=runs.filter(r=>r.date>=wStart&&r.date<=wEnd);
+    var miles=weekRuns.filter(r=>r.type!=='rest').reduce((a,r)=>a+(parseFloat(r.dist)||0),0);
+    buckets.push({iso:wStart,isCurrentWeek:(wStart===ws),miles,domType:dominantType(weekRuns)});
+  }
+  return buckets;
+}
+
+function renderLegend(types){
+  var el=document.getElementById('chartLegend'); if(!el) return;
+  var labels={race:'Race',interval:'Interval',tempo:'Tempo',long:'Long',easy:'Easy',rest:'Rest'};
+  el.innerHTML=types.map(t=>'<div class="legend-item"><div class="legend-dot" style="background:'+typeColor(t).hex+'"></div>'+(labels[t]||t)+'</div>').join('');
+}
+
+function wireTooltip(canvas,buckets,W,isDayMode){
+  var tip=document.getElementById('chartTooltip');
+  var padL=40, padR=12, cW=W-padL-padR;
+  var spacing=buckets.length>0?cW/buckets.length:1;
+  canvas.onmousemove=function(e){
+    var rect=canvas.getBoundingClientRect(), mx=e.clientX-rect.left;
+    var idx=Math.floor((mx-padL)/spacing);
+    if(idx<0||idx>=buckets.length){tip.style.display='none';return;}
+    var b=buckets[idx];
+    var label=isDayMode?b.iso:('Wk of '+fmtDateShort(b.iso));
+    tip.textContent=label+' \u2022 '+b.miles.toFixed(1)+' mi';
+    tip.style.left=Math.min(padL+idx*spacing+spacing/2,W-120)+'px';
+    tip.style.top='4px'; tip.style.display='block';
+  };
+  canvas.onmouseleave=function(){ tip.style.display='none'; };
+  canvas.ontouchmove=function(e){
+    e.preventDefault();
+    var t=e.touches[0], rect=canvas.getBoundingClientRect(), mx=t.clientX-rect.left;
+    var idx=Math.floor((mx-padL)/spacing);
+    if(idx<0||idx>=buckets.length){tip.style.display='none';return;}
+    var b=buckets[idx];
+    var label=isDayMode?b.iso:('Wk of '+fmtDateShort(b.iso));
+    tip.textContent=label+' \u2022 '+b.miles.toFixed(1)+' mi';
+    tip.style.left=Math.min(mx,W-120)+'px'; tip.style.top='4px'; tip.style.display='block';
+  };
+  canvas.ontouchend=function(){ tip.style.display='none'; };
+}
+
+function renderBuckets(ctx,buckets,W,H,today,dayMode){
+  var maxMiles=Math.max.apply(null,buckets.map(b=>b.miles)); if(maxMiles<1) maxMiles=10;
+  var pad={t:16,r:12,b:32,l:40}, cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  if(!ctx) return; ctx.fillStyle='#0B1426'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(46,65,102,0.8)'; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  for(var g=0;g<=4;g++){
+    var gy=pad.t+(cH/4)*g;
+    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(pad.l+cW,gy); ctx.stroke();
+    ctx.fillStyle='rgba(122,139,160,0.7)'; ctx.font='9px Inter,sans-serif'; ctx.textAlign='right';
+    ctx.fillText((maxMiles*(4-g)/4).toFixed(0),pad.l-4,gy+3);
+  }
+  ctx.setLineDash([]);
+  if(buckets.length===0) return;
+  var spacing=cW/buckets.length, barW=Math.max(2,spacing*0.55);
+  var typesPresent=[];
+  buckets.forEach(b=>{ if(b.domType&&b.miles>0&&typesPresent.indexOf(b.domType)===-1) typesPresent.push(b.domType); });
+  var typeOrder=['race','interval','tempo','long','easy','rest'];
+  typesPresent.sort((a,b2)=>typeOrder.indexOf(a)-typeOrder.indexOf(b2));
+  renderLegend(typesPresent);
+  if(chartType==='line'){
+    ctx.beginPath();
+    buckets.forEach((b,idx)=>{ var x=pad.l+idx*spacing+spacing/2,y=pad.t+cH-(b.miles/maxMiles)*cH; if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.strokeStyle='rgba(122,139,160,0.45)'; ctx.lineWidth=1.5; ctx.stroke();
+    buckets.forEach((b,idx)=>{
+      if(b.miles===0) return;
+      var x=pad.l+idx*spacing+spacing/2, y=pad.t+cH-(b.miles/maxMiles)*cH;
+      var isCurrent=dayMode?(b.iso===today):b.isCurrentWeek;
+      var col=isCurrent?'#F5A623':(b.domType?typeColor(b.domType).line:'rgba(122,139,160,0.7)');
+      ctx.beginPath(); ctx.arc(x,y,isCurrent?5:4,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+    });
+  } else {
+    buckets.forEach((b,idx)=>{
+      var x=pad.l+idx*spacing+spacing/2, barH=(b.miles/maxMiles)*cH, y=pad.t+cH-barH;
+      var isCurrent=dayMode?(b.iso===today):b.isCurrentWeek;
+      if(barH<1) return;
+      var col=isCurrent?{hi:'rgba(245,166,35,0.9)',lo:'rgba(245,166,35,0.3)'}:(b.domType?typeColor(b.domType):DEFAULT_COLOR);
+      var bg=ctx.createLinearGradient(x,y,x,pad.t+cH);
+      bg.addColorStop(0,col.hi); bg.addColorStop(1,col.lo);
+      ctx.fillStyle=bg;
+      var rr=Math.min(3,barW/2), bx=x-barW/2;
+      ctx.beginPath();
+      ctx.moveTo(bx+rr,y);
+      ctx.lineTo(bx+barW-rr,y);
+      ctx.arcTo(bx+barW,y,bx+barW,y+rr,rr);
+      ctx.lineTo(bx+barW,pad.t+cH);
+      ctx.lineTo(bx,pad.t+cH);
+      ctx.arcTo(bx,y,bx+rr,y,rr);
+      ctx.closePath();
+      ctx.fill();
+    });
+  }
+  var step=Math.max(1,Math.floor(buckets.length/8));
+  buckets.forEach((b,idx)=>{
+    if(idx%step!==0) return;
+    var x=pad.l+idx*spacing+spacing/2;
+    ctx.fillStyle='rgba(122,139,160,0.6)'; ctx.font='9px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(fmtDateShort(b.iso),x,H-6);
+  });
+  ctx.fillStyle='rgba(122,139,160,0.5)'; ctx.font='9px Inter,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('mi',4,pad.t+4);
+}
+
+function drawLogChart(runs){
+  var canvas=document.getElementById('logChart');
+  var dpr=Math.round(window.devicePixelRatio||1);
+  var W=canvas.offsetWidth, H=180;
+  canvas.width=W*dpr; canvas.height=H*dpr; canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d'); if(!ctx) return; ctx.scale(dpr,dpr);
+  var isDayView=(chartRange==='1w'||chartRange==='2w'||chartRange==='4w');
+  var today=todayISO(), buckets=isDayView?buildDayBuckets(runs,today):buildWeekBuckets(runs,today);
+  renderBuckets(ctx,buckets,W,H,today,isDayView);
+  wireTooltip(canvas,buckets,W,isDayView);
+}
+
+function renderTable(runs){
+  var wrap=document.getElementById('tableWrap');
+  var countEl=document.getElementById('entryCount');
+  if(runs.length===0){
+    wrap.innerHTML='<div class="empty-log"><div class="big">\uD83C\uDFC3</div><p>No runs logged yet.<br>Add your first run above.</p></div>';
+    countEl.textContent=''; return;
+  }
+  var sorted=runs.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  countEl.textContent=sorted.length+' run'+(sorted.length!==1?'s':'');
+  var html='<table><thead><tr><th>Date</th><th>Dist</th><th>Duration</th><th>Pace</th><th>Type</th><th>Feel</th><th></th></tr></thead><tbody>';
+  sorted.forEach(function(r){
+    var pace=calcPaceLog(parseFloat(r.dist),r.secs);
+    var feelEmoji=resolveFeel(r.feel);
+    html+='<tr onclick="openDetail(\''+r.id+'\')">'
+      +'<td class="td-date">'+r.date+'</td>'
+      +'<td class="td-dist">'+(parseFloat(r.dist)||0).toFixed(2)+'</td>'
+      +'<td class="td-pace">'+fmtDuration(r.secs)+'</td>'
+      +'<td class="td-pace">'+fmtPace(pace)+'</td>'
+      +'<td><span class="type-pill '+pillClass(r.type)+'">'+pillLabel(r.type)+'</span></td>'
+      +'<td class="td-feel">'+feelEmoji+'</td>'
+      +'<td class="td-actions"><button class="td-edit" onclick="event.stopPropagation();editRun(\''+r.id+'\')" title="Edit">&#9998;</button><button class="td-del" onclick="event.stopPropagation();confirmDelete(\''+r.id+'\')" title="Delete">&times;</button></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table>';
+  wrap.innerHTML=html;
+}
+
+function openDetail(id){
+  var runs=loadRuns(), r=runs.find(x=>x.id===id); if(!r) return;
+  currentDetailId=id;
+  document.getElementById('detailTitle').textContent=fmtDateFull(r.date);
+  var pace=calcPaceLog(parseFloat(r.dist),r.secs);
+  var feelEmoji=resolveFeel(r.feel);
+  var paceVal=calcPaceLog(parseFloat(r.dist),r.secs);
+  var compareBadge='';
+  if(activePlan&&paceVal&&r.type!=='rest'){
+    var diff=paceVal-activePlan.racePace;
+    var absDiff=Math.abs(Math.round(diff));
+    var diffStr=(absDiff===0)?'On goal pace':(Math.abs(diff)<60?absDiff+'s '+(diff<0?'faster':'slower')+' than goal pace':(Math.floor(absDiff/60)+'m '+absDiff%60+'s '+(diff<0?'faster':'slower')+' than goal pace'));
+    var cls=diff<-5?'faster':diff>5?'slower':'';
+    compareBadge='<div class="pace-compare '+cls+'" style="margin-top:6px;">'+diffStr+'</div>';
+  }
+  var fuelHtml='';
+  if(r.fuel&&r.fuel.length>0){
+    fuelHtml='<div class="detail-item detail-full"><div class="detail-lbl">Fuel</div><div class="fuel-list">'+r.fuel.map(f=>'<div class="fuel-item"><span class="fuel-item-time">'+(f.time||'')+'</span><span>'+esc(f.name)+'</span></div>').join('')+'</div></div>';
+  }
+  var shoeHtml=r.shoes?'<div class="detail-item"><div class="detail-lbl">Shoes</div><div class="detail-val">'+esc(r.shoes)+'</div></div>':'';
+  var noteHtml=r.note?'<div class="detail-item detail-full"><div class="detail-lbl">Notes</div><div class="detail-note">'+esc(r.note)+'</div></div>':'';
+  document.getElementById('detailBody').innerHTML='<div class="detail-grid">'
+    +'<div class="detail-item"><div class="detail-lbl">Distance</div><div class="detail-val mono">'+(parseFloat(r.dist)||0).toFixed(2)+' mi</div></div>'
+    +'<div class="detail-item"><div class="detail-lbl">Duration</div><div class="detail-val mono">'+fmtDuration(r.secs)+'</div></div>'
+    +'<div class="detail-item"><div class="detail-lbl">Pace</div><div class="detail-val mono">'+fmtPace(pace)+'</div></div>'
+    +'<div class="detail-item"><div class="detail-lbl">Feel</div><div class="detail-val">'+feelEmoji+'</div></div>'
+    +'<div class="detail-item"><div class="detail-lbl">Type</div><div class="detail-val"><span class="type-pill '+pillClass(r.type)+'">'+pillLabel(r.type)+'</span></div></div>'
+    +shoeHtml+fuelHtml+noteHtml
+    +'</div>'
+    +compareBadge;
+  document.getElementById('detailDelBtn').onclick=function(){ confirmDelete(id); closeDetailModal(); };
+  document.getElementById('detailEditBtn').onclick=function(){ editRun(id); };
+  document.getElementById('detailModal').style.display='flex';
+}
+function closeDetail(e){ if(e.target===document.getElementById('detailModal')) closeDetailModal(); }
+function closeDetailModal(){ document.getElementById('detailModal').style.display='none'; currentDetailId=null; }
+
+function editRun(id){
+  var runs=loadRuns(), r=runs.find(x=>x.id===id); if(!r) return;
+  closeDetailModal();
+  editingId=id;
+  document.getElementById('fDate').value=r.date;
+  document.getElementById('fDist').value=r.dist;
+  document.getElementById('fDuration').value=r.secs?fmtDuration(r.secs):'';
+  document.getElementById('fType').value=r.type||'easy';
+  document.getElementById('fFeel').value=Object.keys(FEEL_MAP).indexOf(r.feel)!==-1?r.feel:'good';
+  document.getElementById('fNote').value=r.note||'';
+  var container=document.getElementById('fuelEntries'); container.innerHTML='';
+  if(r.fuel&&r.fuel.length>0) r.fuel.forEach(f=>addFuelRowWithValues(f.time,f.name));
+  document.getElementById('logRunBtn').textContent='Save Changes';
+  document.getElementById('formTitle').textContent='Edit Run';
+  document.querySelector('.log-panel:nth-of-type(3)').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function addFuelRow(){
+  var s=loadSettings(), presets=s.fuelPresets||[];
+  addFuelRowWithValues('','',presets);
+}
+function addFuelRowWithValues(timeVal,nameVal,presetsOverride){
+  var s=loadSettings(), presets=presetsOverride||s.fuelPresets||[];
+  var container=document.getElementById('fuelEntries');
+  var row=document.createElement('div'); row.className='fuel-row';
+  var timeInput=document.createElement('input');
+  timeInput.type='text'; timeInput.className='fuel-time'; timeInput.placeholder='0:30'; timeInput.value=timeVal||'';
+  var nameEl;
+  if(presets.length>0){
+    nameEl=document.createElement('select');
+    nameEl.innerHTML='<option value="">-- Select fuel --</option>'+presets.map(p=>'<option value="'+esc(p)+'"'+(p===nameVal?' selected':'')+'>'+esc(p)+'</option>').join('')+'<option value="__custom__">Other...</option>';
+    nameEl.addEventListener('change',function(){ if(nameEl.value==='__custom__'){ var inp=document.createElement('input'); inp.type='text'; inp.placeholder='Fuel name'; inp.className=nameEl.className; nameEl.parentNode.replaceChild(inp,nameEl); } });
+  } else {
+    nameEl=document.createElement('input'); nameEl.type='text'; nameEl.placeholder='Fuel name'; nameEl.value=nameVal||'';
+  }
+  var del=document.createElement('button'); del.className='btn-icon'; del.innerHTML='&times;'; del.type='button'; del.onclick=function(){ container.removeChild(row); };
+  row.appendChild(timeInput); row.appendChild(nameEl); row.appendChild(del);
+  container.appendChild(row);
+}
+
+function collectFuel(){
+  var rows=document.getElementById('fuelEntries').querySelectorAll('.fuel-row'), result=[];
+  rows.forEach(function(row){
+    var inputs=row.querySelectorAll('input,select'); var timeVal='',nameVal='';
+    inputs.forEach(function(el){ if(el.classList.contains('fuel-time')) timeVal=el.value.trim(); else nameVal=el.tagName==='SELECT'?el.value:el.value.trim(); });
+    if(nameVal&&nameVal!=='__custom__') result.push({time:timeVal,name:nameVal});
+  });
+  return result;
+}
+
+function addRun(){
+  var date=document.getElementById('fDate').value;
+  var dist=document.getElementById('fDist').value;
+  var durStr=document.getElementById('fDuration').value;
+  var type=document.getElementById('fType').value;
+  var feel=document.getElementById('fFeel').value;
+  var note=document.getElementById('fNote').value.trim();
+  var fuel=collectFuel();
+  var s=loadSettings();
+  if(!date){ alert('Please select a date.'); return; }
+  if(!dist||parseFloat(dist)<0){ alert('Please enter a valid distance.'); return; }
+  var secs=parseDuration(durStr);
+  if(durStr.trim()&&secs===null){ alert('Duration format: mm:ss or hh:mm:ss'); return; }
+  var runs=loadRuns();
+  var wasEditing=!!editingId;
+  if(editingId){
+    runs=runs.map(r=>r.id!==editingId?r:{id:r.id,date:date,dist:parseFloat(dist),secs:secs,type:type,feel:feel,shoes:r.shoes,note:note,fuel:fuel});
+    editingId=null;
+  } else {
+    runs.push({id:Date.now()+'-'+Math.random().toString(36).slice(2,7),date:date,dist:parseFloat(dist),secs:secs,type:type,feel:feel,shoes:s.activeShoe||'',note:note,fuel:fuel});
+  }
+  saveRuns(runs); refreshLog(runs);
+  // Show encouragement for new runs (not edits)
+  if(!wasEditing && type!=='rest'){
+    showEncourage(dist, secs, type, feel);
+  }
+  clearForm();
+}
+
+function confirmDelete(id){
+  if(!confirm('Delete this run?')) return;
+  var runs=loadRuns().filter(r=>r.id!==id);
+  saveRuns(runs); refreshLog(runs);
+}
+
+function clearForm(){
+  editingId=null;
+  document.getElementById('fDate').value=todayISO();
+  document.getElementById('fDist').value='';
+  document.getElementById('fDuration').value='';
+  document.getElementById('fType').value='easy';
+  document.getElementById('fFeel').value='good';
+  document.getElementById('fNote').value='';
+  document.getElementById('fuelEntries').innerHTML='';
+  document.getElementById('logRunBtn').textContent='Log Run';
+  document.getElementById('formTitle').textContent='Log a Run';
+}
+
+function openSettings(){ renderShoeList(); renderFuelPresetList(); document.getElementById('settingsModal').style.display='flex'; }
+function closeSettings(){ document.getElementById('settingsModal').style.display='none'; }
+function closeSettingsOuter(e){ if(e.target===document.getElementById('settingsModal')) closeSettings(); }
+
+function renderShoeList(){
+  var s=loadSettings(), list=document.getElementById('shoeList');
+  if(s.shoes.length===0){ list.innerHTML='<p style="font-size:13px;color:var(--muted);">No shoes added yet.</p>'; return; }
+  list.innerHTML=s.shoes.map((shoe,i)=>'<div class="shoe-item"><input type="radio" class="shoe-radio" name="activeShoe" id="shoe'+i+'" value="'+esc(shoe)+'" '+(s.activeShoe===shoe?'checked':'')+' onchange="setActiveShoe(\''+escQ(shoe)+'\')"><label for="shoe'+i+'">'+esc(shoe)+'</label><button class="btn-icon" onclick="removeShoe('+i+')">&times;</button></div>').join('');
+}
+function addShoe(){ var name=document.getElementById('newShoeName').value.trim(); if(!name) return; var s=loadSettings(); if(s.shoes.indexOf(name)===-1) s.shoes.push(name); if(!s.activeShoe) s.activeShoe=name; saveSettings(s); document.getElementById('newShoeName').value=''; renderShoeList(); updateShoeIndicator(); }
+function removeShoe(idx){ var s=loadSettings(); var removed=s.shoes.splice(idx,1)[0]; if(s.activeShoe===removed) s.activeShoe=s.shoes[0]||''; saveSettings(s); renderShoeList(); updateShoeIndicator(); }
+function setActiveShoe(name){ var s=loadSettings(); s.activeShoe=name; saveSettings(s); updateShoeIndicator(); }
+function renderFuelPresetList(){ var s=loadSettings(); var list=document.getElementById('fuelPresetList'); if(!s.fuelPresets||s.fuelPresets.length===0){ list.innerHTML='<p style="font-size:13px;color:var(--muted);">No fuel presets yet.</p>'; return; } list.innerHTML=s.fuelPresets.map((f,i)=>'<div class="fuel-preset-item"><label>'+esc(f)+'</label><button class="btn-icon" onclick="removeFuelPreset('+i+')">&times;</button></div>').join(''); }
+function addFuelPreset(){ var name=document.getElementById('newFuelName').value.trim(); if(!name) return; var s=loadSettings(); if(!s.fuelPresets) s.fuelPresets=[]; if(s.fuelPresets.indexOf(name)===-1) s.fuelPresets.push(name); saveSettings(s); document.getElementById('newFuelName').value=''; renderFuelPresetList(); }
+function removeFuelPreset(idx){ var s=loadSettings(); s.fuelPresets.splice(idx,1); saveSettings(s); renderFuelPresetList(); }
+
+function updateShoeIndicator(){
+  var s=loadSettings(), ind=document.getElementById('shoeIndicator'), nm=document.getElementById('shoeIndicatorName');
+  if(s.activeShoe){ nm.textContent=s.activeShoe; ind.style.display='flex'; } else { ind.style.display='none'; }
+}
+
+function refreshLog(runs){
+  updateStats(runs); updateWeekDots(runs); drawLogChart(runs); renderTable(runs); updateShoeIndicator();
+}
+
+// ========================================================
+// PLAN LOCK
+// ========================================================
+function lockPlan(){
+  document.querySelector('.panel-left').classList.add('plan-locked');
+  document.getElementById('changePlanRow').classList.add('visible');
+  // Also visually lock the day pickers
+  document.querySelectorAll('.day-chip').forEach(c=>c.style.pointerEvents='none');
+}
+function unlockPlan(){
+  // Show in-page confirm instead of confirm() which fails in sandboxed iframes
+  document.getElementById('confirmModal').style.display='flex';
+}
+function dismissConfirm(){
+  document.getElementById('confirmModal').style.display='none';
+}
+function confirmChangePlan(){
+  document.getElementById('confirmModal').style.display='none';
+  document.querySelector('.panel-left').classList.remove('plan-locked');
+  document.getElementById('changePlanRow').classList.remove('visible');
+  document.querySelectorAll('.day-chip').forEach(function(ch){ ch.style.pointerEvents=''; });
+  clearOverrides();
+  clearWeeks();
+  var ww2=document.getElementById('weeksWrap');
+  if(ww2){ ww2.classList.remove('plan-active'); ww2.innerHTML=''; ww2.classList.remove('visible'); }
+  document.getElementById('todayCard').classList.remove('visible');
+  document.getElementById('emptyState').style.display='';
+  document.getElementById('planHeader').classList.remove('visible');
+  document.getElementById('paceGrid').innerHTML='';
+  document.getElementById('chartWrap').classList.remove('visible');
+  document.getElementById('planFooter').classList.remove('visible');
+  document.getElementById('methodCard').classList.remove('visible');
+  try{ localStorage.removeItem('appaday-051-plan'); }catch(e){}
+  activePlan=null;
+  document.getElementById('paceStrip').classList.remove('visible');
+  // Switch to plan tab so user can configure new plan
+  switchTab('plan');
+}
+
+// ========================================================
+// POST-RUN ENCOURAGEMENT
+// ========================================================
+function buildEncouragement(dist, secs, type, feel, planDay){
+  // planDay is the matched plan day object (may be null)
+  var pace=calcPaceLog(parseFloat(dist),secs);
+  var feelScore={great:2,good:1,meh:0,tough:-1,terrible:-2}[feel]||0;
+
+  var emoji, headline, body, statLine=null;
+
+  // Compare to plan day if available
+  if(activePlan && pace && type!=='rest'){
+    var diff=pace - activePlan.racePace; // seconds per mile vs goal pace
+    var absDiff=Math.abs(Math.round(diff));
+    var diffStr=absDiff<5?'right on goal pace':(absDiff<60?absDiff+'s '+(diff<0?'ahead of':'behind')+' goal pace':Math.floor(absDiff/60)+'m '+absDiff%60+'s '+(diff<0?'ahead of':'behind')+' goal pace');
+
+    if(diff<-30 && feelScore>=1){
+      emoji='\uD83D\uDE80'; headline='You flew.';
+      body='That wasn\u2019t just a good run\u2014that was a statement. If you felt that smooth going that fast, race day is going to be something special.';
+      statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
+    } else if(diff<-10){
+      emoji='\uD83D\uDD25'; headline='Faster than planned.';
+      body=feelScore>=0
+        ?'You\u2019ve got more in the tank than the plan expected. Keep banking fitness like this.'
+        :'Strong effort\u2014just watch the recovery. Speed with fatigue is a signal worth listening to.';
+      statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
+    } else if(diff>60 && feelScore<0){
+      emoji='\u2764\uFE0F'; headline='Tough day. Good job showing up.';
+      body='Some days the legs just don\u2019t cooperate. The run still happened. That\u2019s what builds the base.';
+      statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
+    } else if(diff>30){
+      emoji='\uD83D\uDCAA'; headline='Honest effort.';
+      body='Running slower than goal pace today isn\u2019t falling behind\u2014easy days are supposed to feel this way. The aerobic work is happening even when it doesn\u2019t feel fast.';
+      statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
+    } else {
+      // On pace
+      emoji='\u2705'; headline='Locked in.';
+      body='Hitting your target pace consistently is exactly how training plans work. Your fitness is tracking the way it should.';
+      statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
+    }
+  } else {
+    // No plan comparison -- go by feel
+    var feelMessages={
+      great:{emoji:'\uD83D\uDE0D',headline:'Outstanding run.',body:'Days like this are why we lace up. Remember this feeling when the tough ones come\u2014you\u2019ve earned it.'},
+      good: {emoji:'\u2714\uFE0F',headline:'Solid work.',body:'A good run logged is a good run banked. Consistency is the whole game.'},
+      meh:  {emoji:'\uD83D\uDCAA',headline:'You showed up.',body:'A meh run still beats no run. The legs will come around.'},
+      tough:{emoji:'\u2764\uFE0F',headline:'That took something.',body:'Finishing a tough run when you wanted to quit is exactly the kind of thing that makes race day possible.'},
+      terrible:{emoji:'\uD83D\uDE4F',headline:'You made it.',body:'Some days are just hard. You got through it. Rest, hydrate, and come back tomorrow.'}
+    };
+    var msg=feelMessages[feel]||feelMessages.good;
+    emoji=msg.emoji; headline=msg.headline; body=msg.body;
+    if(pace) statLine=fmtPace(pace)+' avg \u00b7 '+parseFloat(dist).toFixed(2)+' mi';
+  }
+
+  // Workout-type flavor additions
+  if(type==='long' && feelScore>=1){
+    body+=' Long run done\u2014that\u2019s the biggest single workout of the week. You\u2019ve earned your rest.';
+  } else if(type==='race'){
+    emoji='\uD83C\uDFC6'; headline='Race complete.';
+    body='Whatever the clock said, you toed the line and ran your race. That\u2019s the whole point.';
+  } else if(type==='interval' && feelScore>=1){
+    body+=' Interval work is the hardest thing to execute well. You did.';
+  }
+
+  return {emoji, headline, body, statLine};
+}
+
+function showEncourage(dist, secs, type, feel){
+  if(type==='rest') return; // no encouragement for rest days
+  var msg=buildEncouragement(dist,secs,type,feel,null);
+  document.getElementById('encourageEmoji').textContent=msg.emoji;
+  document.getElementById('encourageHeadline').textContent=msg.headline;
+  document.getElementById('encourageBody').textContent=msg.body;
+  var statEl=document.getElementById('encourageStat');
+  if(msg.statLine){ statEl.textContent=msg.statLine; statEl.style.display='block'; }
+  else { statEl.style.display='none'; }
+  document.getElementById('encourageModal').style.display='flex';
+}
+
+function dismissEncourage(){
+  document.getElementById('encourageModal').style.display='none';
+}
+
+// ========================================================
+// TODAY CARD
+// ========================================================
+var todayPrescribed = null; // cache for prefill
+
+function renderTodayCard(weeks, startDateStr) {
+  var card = document.getElementById('todayCard');
+  var body = document.getElementById('todayCardBody');
+  var dateEl = document.getElementById('todayCardDate');
+  var logBtn = document.getElementById('todayLogBtn');
+
+  if(!weeks || weeks.length === 0){ card.classList.remove('visible'); return; }
+
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  // 0=Sun,1=Mon...6=Sat in JS getDay(); map to plan 0=Mon..6=Sun
+  var JS_TO_PLAN = [6,0,1,2,3,4,5]; // JS Sunday=6, Monday=0, etc.
+
+  var todayStr = todayISO();
+  var dObj = new Date(todayStr+'T00:00:00');
+  dateEl.textContent = DNAMES[dObj.getDay()]+', '+MONTHS[dObj.getMonth()]+' '+dObj.getDate();
+
+  var weekIdx = 0;
+  var dayIdx = JS_TO_PLAN[dObj.getDay()]; // default: use today's weekday against week 1
+
+  // If we have a start date, compute exact position in the plan
+  var resolvedStart = startDateStr || '';
+  if(!resolvedStart){
+    // Try loading from DATE_KEY as fallback
+    try{ resolvedStart = localStorage.getItem('appaday-051-startDate')||''  ; }catch(e){}
+  }
+
+  var startDate = resolvedStart ? parseLocalDate(resolvedStart) : null;
+
+  if(startDate){
+    var startMs = startDate.getTime();
+    var todayMs = dObj.getTime();
+    var daysDiff = Math.round((todayMs - startMs)/(1000*60*60*24));
+
+    if(daysDiff < 0){
+      // Plan hasn't started yet -- show week 1 preview based on weekday
+      body.innerHTML = '<div class="today-no-plan">Your plan starts '+
+        MONTHS[startDate.getMonth()]+' '+startDate.getDate()+        '. Here is what Week 1 looks like for today:</div>';
+      // Fall through to use week 0 / weekday slot below
+      weekIdx = 0;
+    } else if(daysDiff >= weeks.length * 7){
+      // Plan complete
+      body.innerHTML = '<div class="today-no-plan">Plan complete. Great work.</div>';
+      logBtn.style.display = 'none';
+      card.classList.add('visible');
+      return;
+    } else {
+      weekIdx = Math.floor(daysDiff / 7);
+      dayIdx  = daysDiff % 7;
+    }
+  }
+
+  var wk = weeks[weekIdx];
+
+  // Apply any override for this week
+  var overrides = loadOverrides();
+  var overrideDays = overrides[weekIdx] || null;
+  var displayDays = wk.days;
+  if(overrideDays && overrideDays.length > 0 && !wk.isRaceWk){
+    var savedPaces = loadPlan();
+    if(savedPaces){
+      var pacesForOverride = { race:savedPaces.racePace, easy:savedPaces.easyPace, tempo:savedPaces.tempoPace };
+      var ovResult = applyWeekOverride(wk.days, overrideDays, pacesForOverride, '');
+      displayDays = ovResult.days;
+    }
+  }
+
+  var day = displayDays[dayIdx];
+  if(!day){ card.classList.remove('visible'); return; }
+  todayPrescribed = day;
+
+  var isRest = (day.type==='rest'||day.type==='cross');
+
+  if(isRest){
+    body.innerHTML =
+      '<div class="today-type-dot '+(day.type||'rest')+'"></div>'+
+      '<div class="today-info">'+
+        '<div class="today-rest-msg">'+(day.type==='cross'?'Cross-Training Day':'Rest Day')+'</div>'+
+        '<div class="today-detail">'+(day.detail||'Recovery is part of the plan. Take it easy today.')+'</div>'+
+      '</div>';
+    logBtn.style.display = 'none';
+  } else {
+    body.innerHTML =
+      '<div class="today-type-dot '+day.type+'"></div>'+
+      '<div class="today-info">'+
+        '<div class="today-title">'+day.title+'</div>'+
+        (day.detail?'<div class="today-detail">'+day.detail+'</div>':'')+
+      '</div>'+
+      (day.miles>0?
+        '<div style="text-align:right;">'+
+          '<div class="today-miles-badge">'+day.miles+'</div>'+
+          '<div class="today-miles-unit">miles</div>'+
+        '</div>'
+      :'');
+    logBtn.style.display = 'block';
+  }
+
+  card.classList.add('visible');
+}
+
+function prefillTodayRun(){
+  if(!todayPrescribed) return;
+  // Switch to log tab and pre-fill the form fields
+  switchTab('log');
+  document.getElementById('fDate').value = todayISO();
+  document.getElementById('fType').value = todayPrescribed.type||'easy';
+  if(todayPrescribed.miles>0){
+    document.getElementById('fDist').value = todayPrescribed.miles;
+  }
+  // Scroll form into view
+  setTimeout(function(){
+    var logPanel = document.querySelector('.log-panel:nth-of-type(3)');
+    if(logPanel) logPanel.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 80);
+}
+
+// ========================================================
+// INIT
+// ========================================================
+(function init(){
+  try { document.getElementById('fDate').value=todayISO(); } catch(e){}
+  try {
+    var savedPlan=loadPlan();
+    if(savedPlan){
+      updatePaceStrip(savedPlan);
+      lockPlan();
+      var savedWeeks=loadWeeks();
+      if(savedWeeks){
+        var sdStr=savedPlan.startDate||'';
+        if(!sdStr){ try{ sdStr=localStorage.getItem('appaday-051-startDate')||''; }catch(e){} }
+        renderTodayCard(savedWeeks, sdStr);
+      }
+      switchTab('log');
+    }
+  } catch(e){}
+  try { var runs=loadRuns(); updateStats(runs); } catch(e){}
+  window.addEventListener('resize',function(){
+    try { if(currentTab==='log') drawLogChart(loadRuns()); } catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
