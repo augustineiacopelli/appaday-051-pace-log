@@ -28,5 +28,9 @@ After generating a plan, a persistent amber strip appears between the tabs showi
 ## Stack
 Single-file vanilla HTML/CSS/JS. No frameworks. No build tools. GitHub Pages deployable.
 
+## Updates Needed
+- Error fix to allow fill in runs between training start and today's date breaking run currently.
+- Would like to add additional gfx and other engaging elements to improve overall UI.
+
 ## Part of AppADay
 Built by Augustine Iacopelli · [Portfolio](https://augustineiacopelli.github.io/appaday/)
