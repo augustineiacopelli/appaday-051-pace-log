@@ -1778,6 +1778,7 @@ function renderPlan() {
   // ---- BASE TRAINING: fill gap if plan starts in the future ---------------
   var displayStartStr = startDateStr;
   var baseWeekCount = 0;
+  var blockedForBase = daysOff.filter(function(d){ return d!==longRunDay; }); // mirror of generateWeeks' blocked
   if(startDate){
     var todayForBase = new Date();
     todayForBase.setHours(0,0,0,0);
@@ -1797,7 +1798,7 @@ function renderPlan() {
         var pct = gapWeeks>1 ? bi/(gapWeeks-1) : 1;
         var targetMi = Math.round(baseStart + (week1Miles*0.9 - baseStart)*pct);
         var bSlots = Array.from({length:7}, function(_2,di){
-          if(blocked.indexOf(di)!==-1){
+          if(blockedForBase.indexOf(di)!==-1){
             return {name:DAYS_B[di],type:'rest',miles:0,title:'Rest',detail:'',pace:0};
           }
           if(di===longRunDay){
