@@ -2225,6 +2225,7 @@ function updateStartDateHint(){ updateDateHints(); }
   updateDateHints();
 })();
 
+try{
 document.getElementById('startDate').addEventListener('change', function(){
   try{ localStorage.setItem(DATE_KEY, document.getElementById('startDate').value); }catch(e){}
   updateDateHints();
@@ -2234,6 +2235,7 @@ document.getElementById('raceDate').addEventListener('change', function(){
   try{ localStorage.setItem(RACE_DATE_KEY, rv); }catch(e){}
   updateDateHints();
 });
+}catch(e){console.error('date-wire:',e.message);}
 updateGoalHint();
 
 // ========================================================
