@@ -1281,6 +1281,13 @@ tbody td { padding: 9px 10px; vertical-align: middle; }
 // SHARED STATE & STORAGE
 // ========================================================
 var STORE_KEY    = 'appaday-051-runs';
+
+// Plan view cache (module-level so restorePlanView can access them)
+var cachedWeeks = null;
+var cachedPaces = null;
+var cachedStyle = null;
+var cachedStartDate = null;
+var cachedBaseWeekCount = 0;
 var SETTINGS_KEY = 'appaday-051-settings';
 var PLAN_KEY       = 'appaday-051-plan';
 var DATE_KEY       = 'appaday-051-startDate';
@@ -1698,6 +1705,145 @@ function drawMileageChart(weeks, maxMiles) {
   ctx.textAlign='right'; ctx.fillText(maxMiles+' mi',pad.left-4,pad.top+10);
 }
 
+function renderWeekCard(wk,idx,overrideDays){
+  var card=document.createElement('div'); card.className='week-card';
+  if(idx===0) card.classList.add('open');
+
+  // Apply override if present
+  var displayDays=wk.days;
+  var overrideChanges=[];
+  if(overrideDays&&overrideDays.length>0&&!wk.isRaceWk){
+    var result=applyWeekOverride(wk.days,overrideDays,cachedPaces,cachedStyle);
+    displayDays=result.days;
+    overrideChanges=result.changes;
+  }
+
+  var displayMiles=displayDays.reduce(function(s,d){ return (d.type!=='rest'&&d.type!=='cross')?s+(d.miles||0):s; },0);
+
+  var taperBadge=(wk.isTaper||wk.isRaceWk)
+    ?'<span class="taper-badge">'+(wk.isRaceWk?'Race Week':'Taper')+'</span>':'';
+  var onrampBadge=wk.isOnramp
+    ?'<span class="taper-badge" style="background:rgba(59,130,246,0.12);color:var(--blue);border-color:rgba(59,130,246,0.3);">Onramp</span>':'';
+  var baseBadge=wk.isBase
+    ?'<span class="taper-badge" style="background:rgba(16,185,129,0.12);color:var(--green);border-color:rgba(16,185,129,0.3);">Base</span>':'';
+  var overrideBadge=overrideChanges.length>0?'<span class="override-badge">Adjusted</span>':'';
+  var dateRange=null;
+  if(wk.weekMonISO){
+    var bMon2=parseLocalDate(wk.weekMonISO);
+    if(bMon2) dateRange=weekDateRange(0,bMon2);
+  } else if(cachedStartDate && !wk.isBase){
+    dateRange=weekDateRange(idx,cachedStartDate);
+  }
+  var weekDateLbl=dateRange?'<div class="week-dates">'+dateRange.label+'</div>':'';
+  var _maxMpw=cachedWeeks?Math.max.apply(null,cachedWeeks.filter(function(w){return !w.isOnramp&&!w.isBase;}).map(function(w){return w.miles||0;})):displayMiles||1;
+  if(!_maxMpw||_maxMpw===0) _maxMpw=displayMiles||1;
+  var barPct=Math.round((displayMiles/_maxMpw)*100);
+
+  var dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var overrideDaysCurrent=overrideDays||[];
+
+  var dayRowsHtml=displayDays.map(function(d,di){
+    if(d.beforeStart) return '';
+    var isRest=d.type==='rest';
+    var dateLbl=cachedStartDate?'<div class="day-date-lbl">'+dayDateLabel(idx,di,cachedStartDate)+'</div>':'';
+    var dayBadge='';
+    overrideChanges.forEach(function(ch){
+      if(ch.action==='shifted'&&ch.to===d.name) dayBadge='<span class="shifted-badge">Moved here</span>';
+      if(ch.from===d.name&&ch.action==='redistributed') dayBadge='<span class="override-badge">Day Off</span>';
+      if(ch.from===d.name&&ch.action==='shifted') dayBadge='<span class="override-badge">Day Off</span>';
+    });
+    if(d.redistributed) dayBadge+='<span class="shifted-badge">+mi</span>';
+    return '<div class="day-row">'+
+      '<div class="day-name">'+d.name+(dateLbl?'<br>'+dateLbl:'')+'</div>'+
+      '<div class="day-dot '+(isRest?'rest':d.type)+'"></div>'+
+      '<div class="day-desc"><div class="day-title">'+d.title+dayBadge+'</div>'+(d.detail?'<div class="day-detail">'+d.detail+'</div>':'')+'</div>'+
+      '<div class="day-miles'+(isRest?' rest-miles':'')+'">'+((d.type==='rest')?'Rest':(d.miles>0?d.miles+' mi':''))+'</div>'+
+    '</div>';
+  }).join('');
+
+  var overridePanelHtml=(wk.isRaceWk||wk.isOnramp||wk.isBase)?'':(
+    '<div class="week-override-panel" id="op-'+idx+'">'+
+      '<div class="override-label">One-off day off this week</div>'+
+      '<div class="override-hint">Tap a day to mark it unavailable. Runs will shift to a free slot or mileage redistributes.</div>'+
+      '<div class="override-day-row" id="odr-'+idx+'">'+
+        dayNames.map(function(dn,di){
+          var isOff=overrideDaysCurrent.indexOf(di)!==-1;
+          var isLocked=(daysOff.indexOf(di)!==-1)||(di===longRunDay);
+          return '<div class="override-chip'+(isOff?' off':'')+(isLocked?' locked':'')+'" data-wi="'+idx+'" data-di="'+di+'" data-locked="'+isLocked+'">'+dn+'</div>';
+        }).join('')+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+        '<button class="override-apply-btn" data-wi="'+idx+'">Apply</button>'+
+        (overrideDaysCurrent.length>0?'<button class="override-clear-btn" data-wi="'+idx+'">Clear</button>':'')+
+      '</div>'+
+    '</div>'
+  );
+
+  card.innerHTML=
+    '<div class="week-header">'+
+      '<div class="week-left">'+
+        '<div class="week-num">Week '+wk.week+'</div>'+
+        '<div class="week-phase">'+wk.phase+taperBadge+onrampBadge+baseBadge+overrideBadge+weekDateLbl+'</div>'+
+      '</div>'+
+      '<div class="week-right">'+
+        '<div class="week-miles">'+displayMiles+' <span>mi</span></div>'+
+        ((wk.isRaceWk||wk.isOnramp||wk.isBase)?'':'<button class="week-override-btn" data-wi="'+idx+'">+ Day Off</button>')+
+        '<div class="week-chevron">&#9660;</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="week-bar-wrap"><div class="week-bar-track"><div class="week-bar-fill" style="width:'+barPct+'%"></div></div></div>'+
+    '<div class="week-days">'+dayRowsHtml+'</div>'+
+    overridePanelHtml;
+
+  card.querySelector('.week-header').addEventListener('click',function(e){
+    if(e.target.closest('.week-override-btn')) return;
+    card.classList.toggle('open');
+  });
+
+  var oBtn=card.querySelector('.week-override-btn');
+  if(oBtn) oBtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var panel=document.getElementById('op-'+idx);
+    if(panel) panel.classList.toggle('open');
+    if(!card.classList.contains('open')) card.classList.add('open');
+  });
+
+  card.querySelectorAll('.override-chip').forEach(function(chip){
+    chip.addEventListener('click',function(){
+      if(chip.dataset.locked==='true') return;
+      chip.classList.toggle('off');
+    });
+  });
+
+  var applyBtn=card.querySelector('.override-apply-btn');
+  if(applyBtn) applyBtn.addEventListener('click',function(){
+    var wi=parseInt(applyBtn.dataset.wi);
+    var selectedOff=[];
+    card.querySelectorAll('.override-chip.off').forEach(function(chip){
+      selectedOff.push(parseInt(chip.dataset.di));
+    });
+    var ov=loadOverrides();
+    if(selectedOff.length===0){ delete ov[wi]; } else { ov[wi]=selectedOff; }
+    saveOverrides(ov);
+    var newCard=renderWeekCard(cachedWeeks[wi],wi,selectedOff.length>0?selectedOff:null);
+    newCard.classList.add('open');
+    var panel2=newCard.querySelector('.week-override-panel');
+    if(panel2) panel2.classList.add('open');
+    ww.replaceChild(newCard,card);
+  });
+
+  var clearBtn=card.querySelector('.override-clear-btn');
+  if(clearBtn) clearBtn.addEventListener('click',function(){
+    var wi=parseInt(clearBtn.dataset.wi);
+    var ov=loadOverrides(); delete ov[wi]; saveOverrides(ov);
+    var newCard=renderWeekCard(cachedWeeks[wi],wi,null);
+    newCard.classList.add('open');
+    ww.replaceChild(newCard,card);
+  });
+
+  return card;
+}
+
 function renderPlan() {
   var dist=selectedDist, cfg=DISTANCES[dist];
   var h=parseInt(document.getElementById('hrs').value)||0;
@@ -1881,148 +2027,11 @@ function renderPlan() {
   var ww=document.getElementById('weeksWrap'); ww.innerHTML=''; ww.classList.add('visible');
   ww.classList.add('plan-active');
   var overrides=loadOverrides();
-  var cachedWeeks=allWeeks;
-  var cachedPaces=paces;
-  var cachedStyle=style;
-  var cachedStartDate=parseLocalDate(displayStartStr);
-  var cachedBaseWeekCount=baseWeekCount;
-
-  function renderWeekCard(wk,idx,overrideDays){
-    var card=document.createElement('div'); card.className='week-card';
-    if(idx===0) card.classList.add('open');
-
-    // Apply override if present
-    var displayDays=wk.days;
-    var overrideChanges=[];
-    if(overrideDays&&overrideDays.length>0&&!wk.isRaceWk){
-      var result=applyWeekOverride(wk.days,overrideDays,cachedPaces,cachedStyle);
-      displayDays=result.days;
-      overrideChanges=result.changes;
-    }
-
-    var displayMiles=displayDays.reduce(function(s,d){ return (d.type!=='rest'&&d.type!=='cross')?s+(d.miles||0):s; },0);
-
-    var taperBadge=(wk.isTaper||wk.isRaceWk)
-      ?'<span class="taper-badge">'+(wk.isRaceWk?'Race Week':'Taper')+'</span>':'';
-    var onrampBadge=wk.isOnramp
-      ?'<span class="taper-badge" style="background:rgba(59,130,246,0.12);color:var(--blue);border-color:rgba(59,130,246,0.3);">Onramp</span>':'';
-    var baseBadge=wk.isBase
-      ?'<span class="taper-badge" style="background:rgba(16,185,129,0.12);color:var(--green);border-color:rgba(16,185,129,0.3);">Base</span>':'';
-    var overrideBadge=overrideChanges.length>0?'<span class="override-badge">Adjusted</span>':'';
-    var dateRange=null;
-    if(wk.weekMonISO){
-      var bMon2=parseLocalDate(wk.weekMonISO);
-      if(bMon2) dateRange=weekDateRange(0,bMon2);
-    } else if(cachedStartDate && !wk.isBase){
-      dateRange=weekDateRange(idx,cachedStartDate);
-    }
-    var weekDateLbl=dateRange?'<div class="week-dates">'+dateRange.label+'</div>':'';
-    var barPct=Math.round((displayMiles/maxMpw)*100);
-
-    var dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var overrideDaysCurrent=overrideDays||[];
-
-    var dayRowsHtml=displayDays.map(function(d,di){
-      if(d.beforeStart) return '';
-      var isRest=d.type==='rest';
-      var dateLbl=cachedStartDate?'<div class="day-date-lbl">'+dayDateLabel(idx,di,cachedStartDate)+'</div>':'';
-      var dayBadge='';
-      overrideChanges.forEach(function(ch){
-        if(ch.action==='shifted'&&ch.to===d.name) dayBadge='<span class="shifted-badge">Moved here</span>';
-        if(ch.from===d.name&&ch.action==='redistributed') dayBadge='<span class="override-badge">Day Off</span>';
-        if(ch.from===d.name&&ch.action==='shifted') dayBadge='<span class="override-badge">Day Off</span>';
-      });
-      if(d.redistributed) dayBadge+='<span class="shifted-badge">+mi</span>';
-      return '<div class="day-row">'+
-        '<div class="day-name">'+d.name+(dateLbl?'<br>'+dateLbl:'')+'</div>'+
-        '<div class="day-dot '+(isRest?'rest':d.type)+'"></div>'+
-        '<div class="day-desc"><div class="day-title">'+d.title+dayBadge+'</div>'+(d.detail?'<div class="day-detail">'+d.detail+'</div>':'')+'</div>'+
-        '<div class="day-miles'+(isRest?' rest-miles':'')+'">'+((d.type==='rest')?'Rest':(d.miles>0?d.miles+' mi':''))+'</div>'+
-      '</div>';
-    }).join('');
-
-    var overridePanelHtml=(wk.isRaceWk||wk.isOnramp||wk.isBase)?'':(
-      '<div class="week-override-panel" id="op-'+idx+'">'+
-        '<div class="override-label">One-off day off this week</div>'+
-        '<div class="override-hint">Tap a day to mark it unavailable. Runs will shift to a free slot or mileage redistributes.</div>'+
-        '<div class="override-day-row" id="odr-'+idx+'">'+
-          dayNames.map(function(dn,di){
-            var isOff=overrideDaysCurrent.indexOf(di)!==-1;
-            var isLocked=(daysOff.indexOf(di)!==-1)||(di===longRunDay);
-            return '<div class="override-chip'+(isOff?' off':'')+(isLocked?' locked':'')+'" data-wi="'+idx+'" data-di="'+di+'" data-locked="'+isLocked+'">'+dn+'</div>';
-          }).join('')+
-        '</div>'+
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-          '<button class="override-apply-btn" data-wi="'+idx+'">Apply</button>'+
-          (overrideDaysCurrent.length>0?'<button class="override-clear-btn" data-wi="'+idx+'">Clear</button>':'')+
-        '</div>'+
-      '</div>'
-    );
-
-    card.innerHTML=
-      '<div class="week-header">'+
-        '<div class="week-left">'+
-          '<div class="week-num">Week '+wk.week+'</div>'+
-          '<div class="week-phase">'+wk.phase+taperBadge+onrampBadge+baseBadge+overrideBadge+weekDateLbl+'</div>'+
-        '</div>'+
-        '<div class="week-right">'+
-          '<div class="week-miles">'+displayMiles+' <span>mi</span></div>'+
-          ((wk.isRaceWk||wk.isOnramp||wk.isBase)?'':'<button class="week-override-btn" data-wi="'+idx+'">+ Day Off</button>')+
-          '<div class="week-chevron">&#9660;</div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="week-bar-wrap"><div class="week-bar-track"><div class="week-bar-fill" style="width:'+barPct+'%"></div></div></div>'+
-      '<div class="week-days">'+dayRowsHtml+'</div>'+
-      overridePanelHtml;
-
-    card.querySelector('.week-header').addEventListener('click',function(e){
-      if(e.target.closest('.week-override-btn')) return;
-      card.classList.toggle('open');
-    });
-
-    var oBtn=card.querySelector('.week-override-btn');
-    if(oBtn) oBtn.addEventListener('click',function(e){
-      e.stopPropagation();
-      var panel=document.getElementById('op-'+idx);
-      if(panel) panel.classList.toggle('open');
-      if(!card.classList.contains('open')) card.classList.add('open');
-    });
-
-    card.querySelectorAll('.override-chip').forEach(function(chip){
-      chip.addEventListener('click',function(){
-        if(chip.dataset.locked==='true') return;
-        chip.classList.toggle('off');
-      });
-    });
-
-    var applyBtn=card.querySelector('.override-apply-btn');
-    if(applyBtn) applyBtn.addEventListener('click',function(){
-      var wi=parseInt(applyBtn.dataset.wi);
-      var selectedOff=[];
-      card.querySelectorAll('.override-chip.off').forEach(function(chip){
-        selectedOff.push(parseInt(chip.dataset.di));
-      });
-      var ov=loadOverrides();
-      if(selectedOff.length===0){ delete ov[wi]; } else { ov[wi]=selectedOff; }
-      saveOverrides(ov);
-      var newCard=renderWeekCard(cachedWeeks[wi],wi,selectedOff.length>0?selectedOff:null);
-      newCard.classList.add('open');
-      var panel2=newCard.querySelector('.week-override-panel');
-      if(panel2) panel2.classList.add('open');
-      ww.replaceChild(newCard,card);
-    });
-
-    var clearBtn=card.querySelector('.override-clear-btn');
-    if(clearBtn) clearBtn.addEventListener('click',function(){
-      var wi=parseInt(clearBtn.dataset.wi);
-      var ov=loadOverrides(); delete ov[wi]; saveOverrides(ov);
-      var newCard=renderWeekCard(cachedWeeks[wi],wi,null);
-      newCard.classList.add('open');
-      ww.replaceChild(newCard,card);
-    });
-
-    return card;
-  }
+  cachedWeeks=allWeeks;
+  cachedPaces=paces;
+  cachedStyle=style;
+  cachedStartDate=parseLocalDate(displayStartStr);
+  cachedBaseWeekCount=baseWeekCount;
 
   allWeeks.forEach(function(wk,idx){
     var overrideDays=overrides[idx]||null;
@@ -2904,6 +2913,56 @@ function prefillTodayRun(){
 // ========================================================
 // INIT
 // ========================================================
+function restorePlanView(){
+  try {
+    var plan=loadPlan(), weeks=loadWeeks();
+    if(!plan||!weeks||weeks.length===0) return;
+
+    cachedWeeks=weeks;
+    cachedPaces={race:plan.racePace,easy:plan.easyPace,tempo:plan.tempoPace,
+      long:plan.easyPace,interval:Math.max(300,plan.racePace-20)};
+    cachedStyle='';
+    cachedStartDate=plan.startDate?parseLocalDate(plan.startDate):null;
+    cachedBaseWeekCount=weeks.filter(function(w){return w.isBase;}).length;
+
+    document.getElementById('emptyState').style.display='none';
+    var ph=document.getElementById('planHeader');
+    ph.classList.add('visible');
+    document.getElementById('planTitle').textContent=plan.label+' Training Plan';
+    document.getElementById('planSubtitle').textContent=
+      'Active plan · Goal pace '+formatPace(plan.racePace)+'/mi'+
+      (plan.startDate?' · Starts '+fmtDate(parseLocalDate(plan.startDate)):'');
+
+    var maxMpwR=Math.max.apply(null,weeks.filter(function(w){return !w.isOnramp&&!w.isBase;}).map(function(w){return w.miles||0;}));
+    var pg=document.getElementById('paceGrid'); pg.innerHTML='';
+    [{label:'Goal Pace',value:formatPace(plan.racePace),unit:'min/mile'},
+     {label:'Easy Pace',value:formatPace(plan.easyPace),unit:'min/mile'},
+     {label:'Tempo Pace',value:formatPace(plan.tempoPace),unit:'min/mile'},
+     {label:'Peak Mileage',value:maxMpwR,unit:'miles/week'}
+    ].forEach(function(p){
+      var card=document.createElement('div'); card.className='pace-card';
+      card.innerHTML='<div class="pace-card-label">'+p.label+'</div><div class="pace-card-value">'+p.value+'</div><div class="pace-card-unit">'+p.unit+'</div>';
+      pg.appendChild(card);
+    });
+
+    var cw=document.getElementById('chartWrap'); cw.classList.add('visible');
+    requestAnimationFrame(function(){
+      var cw2=weeks.filter(function(w){return !w.isOnramp&&!w.isBase;});
+      if(cw2.length>0&&maxMpwR>0) drawMileageChart(cw2,maxMpwR);
+    });
+
+    var ww=document.getElementById('weeksWrap');
+    ww.innerHTML=''; ww.classList.add('visible'); ww.classList.add('plan-active');
+    var overrides=loadOverrides();
+    weeks.forEach(function(wk,idx){
+      var card=renderWeekCard(wk,idx,overrides[idx]||null);
+      ww.appendChild(card);
+    });
+
+    document.getElementById('planFooter').classList.add('visible');
+  } catch(e){ console.error('restorePlanView error:',e.message,e.stack); }
+}
+
 (function init(){
   try { document.getElementById('fDate').value=todayISO(); } catch(e){}
   try {
@@ -2911,6 +2970,7 @@ function prefillTodayRun(){
     if(savedPlan){
       updatePaceStrip(savedPlan);
       lockPlan();
+      restorePlanView();
       var savedWeeks=loadWeeks();
       if(savedWeeks){
         var sdStr=savedPlan.startDate||'';
