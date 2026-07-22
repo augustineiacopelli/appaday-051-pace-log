@@ -1511,7 +1511,7 @@ function generateWeeks(dist, fitness, style, paces, raceDayIdxOverride) {
     if(!isTaper){
       // 3a. Interval -- prefer 2 days before long run
       if(style!=='conservative'&&style!=='galloway'&&w>3&&fitness!=='beginner'){
-        var iMiles=Math.round(miles*0.12);
+        var iMiles=Math.min(Math.round(miles*0.12), Math.max(2, longMiles-2));
         var iPref=(longRunDay-2+7)%7;
         var iDay=nearestAvail(iPref,taken,[]);
         if(iDay!==-1){
@@ -1524,7 +1524,7 @@ function generateWeeks(dist, fitness, style, paces, raceDayIdxOverride) {
 
       // 3b. Tempo -- prefer 3 days before long run (different from interval slot)
       if(w>2){
-        var tMiles=Math.round(miles*0.15);
+        var tMiles=Math.min(Math.round(miles*0.15), Math.max(2, longMiles-2));
         var tPref=(longRunDay-3+7)%7;
         var tDay=nearestAvail(tPref,taken,[]);
         if(tDay!==-1){
@@ -1550,19 +1550,18 @@ function generateWeeks(dist, fitness, style, paces, raceDayIdxOverride) {
         var ttPref=(longRunDay-3+7)%7;
         var ttDay=nearestAvail(ttPref,taken,[]);
         if(ttDay!==-1){
-          slots[ttDay]=Object.assign({name:DAYS[ttDay]},mkDay('tempo',Math.round(miles*0.15),'Short tempo','10 min warm-up, 10 min at goal pace, 10 min cool-down.',paces.tempo));
+          var ttMiles=Math.min(Math.round(miles*0.15), Math.max(2, longMiles-2));
+        slots[ttDay]=Object.assign({name:DAYS[ttDay]},mkDay('tempo',ttMiles,'Short tempo','10 min warm-up, 10 min at goal pace, 10 min cool-down.',paces.tempo));
           taken.add(ttDay);
         }
       }
     }
 
     // 4. Easy runs to fill remaining available slots up to dpw
-    // First, compute how many easy slots we want
-    var qualitySlots=taken.size; // long+rest+quality already placed
+    var qualitySlots=taken.size;
     var targetRunDays=Math.min(dpw, avail.length);
     var easyNeeded=Math.max(0, targetRunDays - qualitySlots);
 
-    // Determine available easy slots (not taken, not blocked, not long, not rest-after-long)
     var easySlots=avail.filter(d=>!taken.has(d));
 
     // Distribute easy mileage: remaining miles minus long and quality
@@ -1574,8 +1573,14 @@ function generateWeeks(dist, fitness, style, paces, raceDayIdxOverride) {
     }
     var remainingMiles=Math.max(0, miles-spentMiles + droppedQualityMiles);
     var easyCount=Math.min(easyNeeded, easySlots.length);
-    // Spread remaining miles across easy slots; first slot gets slightly more
-    var easyPerRun=easyCount>0?Math.round(remainingMiles/easyCount):0;
+
+    // Cap: no single easy run should exceed the long run.
+    // Hard ceiling: min(longMiles - 1, easyPerRun). Soft target: spread evenly.
+    // If remainingMiles / easyCount would bust the cap, accept a lower weekly total
+    // rather than assign an absurd single easy run.
+    var easyCapPerRun = Math.max(2, longMiles - 1);
+    var easyPerRun = easyCount > 0 ? Math.round(remainingMiles / easyCount) : 0;
+    easyPerRun = Math.min(easyPerRun, easyCapPerRun);
 
     // Sort easy slots: prefer days closer to midweek for balance
     easySlots.sort((a,b)=>{
@@ -2930,8 +2935,8 @@ function restorePlanView(){
     ph.classList.add('visible');
     document.getElementById('planTitle').textContent=plan.label+' Training Plan';
     document.getElementById('planSubtitle').textContent=
-      'Active plan · Goal pace '+formatPace(plan.racePace)+'/mi'+
-      (plan.startDate?' · Starts '+fmtDate(parseLocalDate(plan.startDate)):'');
+      'Active plan &#183; Goal pace '+formatPace(plan.racePace)+'/mi'+
+      (plan.startDate?' &#183; Starts '+fmtDate(parseLocalDate(plan.startDate)):'');
 
     var maxMpwR=Math.max.apply(null,weeks.filter(function(w){return !w.isOnramp&&!w.isBase;}).map(function(w){return w.miles||0;}));
     var pg=document.getElementById('paceGrid'); pg.innerHTML='';
