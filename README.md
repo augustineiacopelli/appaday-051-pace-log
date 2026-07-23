@@ -34,32 +34,34 @@
 **Today's Workout Card**
 - Appears at the top of the Log tab when a plan is active
 - Shows today's prescribed workout type, title, description, and target mileage
-- "Log This Run" button pre-fills the form with today's date, workout type, and mileage
+- "Log This Run" or "Log Cross-Training" button pre-fills the form with today's date and workout type
 - Accounts for weekly overrides — if today's run was shifted or removed, the card reflects it
 
 **Stats and Tracking**
 - Total miles, total runs, this-week miles, and average pace
-- This-week dot tracker showing daily mileage at a glance
+- This-week dot tracker: run days show blue with mileage, cross-training days show purple "XT", rest days show a dash
 - Weekly mileage chart: bar or line view, 1W / 2W / 4W / 12W / 26W / All ranges, bars colored by dominant workout type
 
 **Run Logging**
-- Date, distance, duration, workout type, feel rating, notes
+- Workout types: Easy, Long Run, Tempo, Interval, Race, Cross-Train, Rest
+- Cross-training sessions are logged separately from rest — they count toward total runs, show a purple pill in the history table, and get their own encouragement messages
+- Date, distance (optional for cross-training), duration, feel rating, and notes
 - Fuel tracking: log what you took and when, with saved presets
 - Shoe tracking: add pairs, set active shoe, logged automatically on each run
 - Full run history table with inline edit and delete
 - Run detail modal with full workout info
 
 **Post-Run Encouragement**
-- After logging a new run, a contextual modal appears with an emoji, headline, and message
-- Message is generated from pace vs. goal pace and the feel rating — faster than goal, on target, or slower each produce different copy
-- Long runs, races, and interval sessions get additional flavor
+- After logging any active session (including cross-training), a contextual modal appears
+- Pace comparison uses the prescribed pace for the workout type — easy/long runs compare against easy pace, tempo against tempo pace, intervals against interval pace; cross-training skips pace comparison entirely
+- Going too fast on an easy day surfaces a gentle caution rather than praise
 
 ### The Bridge: Pace Reference Strip
 
-A persistent amber strip between the tabs shows goal pace, easy pace, and race distance once a plan is active. Survives page reloads. Every run detail modal shows a comparison badge — how many seconds faster or slower the logged pace was versus race goal pace.
+A persistent amber strip between the tabs shows goal pace, easy pace, and race distance once a plan is active. Survives page reloads. Every run detail modal shows a comparison badge — how many seconds faster or slower the logged pace was versus the prescribed pace for that workout type.
 
 ## Stack
-Single-file vanilla HTML/CSS/JS. No frameworks, no build tools. Direct Anthropic API calls with `anthropic-dangerous-direct-browser-access: true`. GitHub Pages deployable.
+Single-file vanilla HTML/CSS/JS. No frameworks, no build tools. GitHub Pages deployable.
 
 ## Part of AppADay
 Built by Augustine Iacopelli · [Portfolio](https://augustineiacopelli.github.io/appaday/)
