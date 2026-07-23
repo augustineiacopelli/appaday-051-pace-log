@@ -127,7 +127,8 @@ html, body {
   display: grid;
   grid-template-columns: 360px 1fr;
   gap: 0;
-  min-height: calc(100dvh - 100px);
+  min-height: 0;
+  flex: 1;
 }
 @media (max-width: 800px) {
   .plan-wrap { grid-template-columns: 1fr; }
@@ -567,6 +568,7 @@ canvas#mileageChart { width: 100%; height: 100%; }
   transition: background .15s;
 }
 .day-dot-log.has-run { background: rgba(59,130,246,0.25); border-color: var(--blue); color: var(--blue); }
+.day-dot-log.has-cross { background: rgba(168,85,247,0.2); border-color: var(--purple); color: var(--purple); }
 .day-dot-log.today { border-color: var(--amber); }
 .day-dist-log { font-size: 8px; color: var(--muted); font-family: 'Inter', sans-serif; }
 
@@ -666,6 +668,7 @@ tbody td { padding: 9px 10px; vertical-align: middle; }
 .pill-interval { background: rgba(239,68,68,0.15);   color: var(--red); }
 .pill-race     { background: rgba(168,85,247,0.15);  color: var(--purple); }
 .pill-rest     { background: rgba(122,139,160,0.15); color: var(--muted); }
+.pill-cross    { background: rgba(168,85,247,0.15);  color: var(--purple); }
 .empty-log { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
 .empty-log .big { font-size: 36px; margin-bottom: 10px; }
 
@@ -1172,7 +1175,8 @@ tbody td { padding: 9px 10px; vertical-align: middle; }
             <option value="tempo">Tempo</option>
             <option value="interval">Interval</option>
             <option value="race">Race</option>
-            <option value="rest">Rest / Cross-Train</option>
+            <option value="cross">Cross-Train</option>
+            <option value="rest">Rest</option>
           </select>
         </div>
         <div class="field"><label for="fFeel">How&#8217;d it feel?</label>
@@ -1349,6 +1353,20 @@ function updatePaceStrip(plan) {
   document.getElementById('paceStrip').classList.add('visible');
 }
 
+function prescribedPace(type) {
+  if (!activePlan) return null;
+  if(type==='tempo') return activePlan.tempoPace;
+  if(type==='interval') return Math.max(300, activePlan.racePace - 20);
+  if(type==='race') return activePlan.racePace;
+  return activePlan.easyPace; // easy, long, default
+}
+function prescribedPaceLabel(type) {
+  if(type==='tempo') return 'tempo pace';
+  if(type==='interval') return 'interval pace';
+  if(type==='race') return 'goal race pace';
+  if(type==='long') return 'long run pace';
+  return 'easy pace';
+}
 function getPaceCompare(loggedPacePerMile) {
   if (!activePlan || !loggedPacePerMile) return null;
   var diff = loggedPacePerMile - activePlan.racePace;
@@ -2282,7 +2300,7 @@ function addDaysISO(iso,n){ var d=new Date(iso+'T00:00:00'); d.setDate(d.getDate
 function fmtDateShort(iso){ var d=new Date(iso+'T00:00:00'); return (d.getMonth()+1)+'/'+d.getDate(); }
 function fmtDateFull(iso){ var d=new Date(iso+'T00:00:00'); var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']; var months=['January','February','March','April','May','June','July','August','September','October','November','December']; return days[d.getDay()]+', '+months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear(); }
 function pillClass(t){ return 'pill-'+t; }
-function pillLabel(t){ return {easy:'Easy',long:'Long',tempo:'Tempo',interval:'Interval',race:'Race',rest:'Rest'}[t]||t; }
+function pillLabel(t){ return {easy:'Easy',long:'Long',tempo:'Tempo',interval:'Interval',race:'Race',cross:'Cross-Train',rest:'Rest'}[t]||t; }
 function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escQ(str){ return String(str||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
 
@@ -2520,10 +2538,12 @@ function openDetail(id){
   var feelEmoji=resolveFeel(r.feel);
   var paceVal=calcPaceLog(parseFloat(r.dist),r.secs);
   var compareBadge='';
-  if(activePlan&&paceVal&&r.type!=='rest'){
-    var diff=paceVal-activePlan.racePace;
+  if(activePlan&&paceVal&&r.type!=='rest'&&r.type!=='cross'){
+    var targetPaceD=prescribedPace(r.type);
+    var paceLabelD=prescribedPaceLabel(r.type);
+    var diff=paceVal-targetPaceD;
     var absDiff=Math.abs(Math.round(diff));
-    var diffStr=(absDiff===0)?'On goal pace':(Math.abs(diff)<60?absDiff+'s '+(diff<0?'faster':'slower')+' than goal pace':(Math.floor(absDiff/60)+'m '+absDiff%60+'s '+(diff<0?'faster':'slower')+' than goal pace'));
+    var diffStr=(absDiff<=5)?'Right on '+paceLabelD:(Math.abs(diff)<60?absDiff+'s '+(diff<0?'faster than':'slower than')+' '+paceLabelD:(Math.floor(absDiff/60)+'m '+Math.round(absDiff%60)+'s '+(diff<0?'faster than':'slower than')+' '+paceLabelD));
     var cls=diff<-5?'faster':diff>5?'slower':'';
     compareBadge='<div class="pace-compare '+cls+'" style="margin-top:6px;">'+diffStr+'</div>';
   }
@@ -2721,21 +2741,35 @@ function buildEncouragement(dist, secs, type, feel, planDay){
 
   var emoji, headline, body, statLine=null;
 
-  // Compare to plan day if available
-  if(activePlan && pace && type!=='rest'){
-    var diff=pace - activePlan.racePace; // seconds per mile vs goal pace
+  // Compare to prescribed pace for this workout type
+  if(activePlan && pace && type!=='rest' && type!=='cross'){
+    var targetPaceB=prescribedPace(type);
+    var paceLabelB=prescribedPaceLabel(type);
+    var diff=pace - targetPaceB;
     var absDiff=Math.abs(Math.round(diff));
-    var diffStr=absDiff<5?'right on goal pace':(absDiff<60?absDiff+'s '+(diff<0?'ahead of':'behind')+' goal pace':Math.floor(absDiff/60)+'m '+absDiff%60+'s '+(diff<0?'ahead of':'behind')+' goal pace');
+    var diffStr=absDiff<=5?'right on '+paceLabelB:(absDiff<60?absDiff+'s '+(diff<0?'ahead of':'behind')+' '+paceLabelB:Math.floor(absDiff/60)+'m '+Math.round(absDiff%60)+'s '+(diff<0?'ahead of':'behind')+' '+paceLabelB);
 
     if(diff<-30 && feelScore>=1){
-      emoji='\uD83D\uDE80'; headline='You flew.';
-      body='That wasn\u2019t just a good run\u2014that was a statement. If you felt that smooth going that fast, race day is going to be something special.';
+      if(type==='easy'||type==='long'){
+        emoji='\u26A0\uFE0F'; headline='A little hot for this one.';
+        body='You ran well below your easy pace target. Easy days are supposed to build aerobic base without taxing recovery\u2014running them too fast can undermine the harder workouts ahead.';
+      } else {
+        emoji='\uD83D\uDE80'; headline='You flew.';
+        body='That wasn\u2019t just a good run\u2014that was a statement. If you felt that smooth going that fast, race day is going to be something special.';
+      }
       statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
     } else if(diff<-10){
-      emoji='\uD83D\uDD25'; headline='Faster than planned.';
-      body=feelScore>=0
-        ?'You\u2019ve got more in the tank than the plan expected. Keep banking fitness like this.'
-        :'Strong effort\u2014just watch the recovery. Speed with fatigue is a signal worth listening to.';
+      if(type==='easy'||type==='long'){
+        emoji='\uD83D\uDD25'; headline='Faster than your easy pace.';
+        body=feelScore>=0
+          ?'You were ahead of your easy pace target today. If it felt truly comfortable, no harm done\u2014just keep easy days easy consistently.'
+          :'Faster than easy pace and it felt tough\u2014that\u2019s a sign to pull back. Protect the easy days.';
+      } else {
+        emoji='\uD83D\uDD25'; headline='Faster than planned.';
+        body=feelScore>=0
+          ?'You\u2019ve got more in the tank than the plan expected. Keep banking fitness like this.'
+          :'Strong effort\u2014just watch the recovery. Speed with fatigue is a signal worth listening to.';
+      }
       statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
     } else if(diff>60 && feelScore<0){
       emoji='\u2764\uFE0F'; headline='Tough day. Good job showing up.';
@@ -2743,7 +2777,13 @@ function buildEncouragement(dist, secs, type, feel, planDay){
       statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
     } else if(diff>30){
       emoji='\uD83D\uDCAA'; headline='Honest effort.';
-      body='Running slower than goal pace today isn\u2019t falling behind\u2014easy days are supposed to feel this way. The aerobic work is happening even when it doesn\u2019t feel fast.';
+      if(type==='easy'||type==='long'){
+        body='You were slower than your target pace today\u2014but easy runs are about time on feet and aerobic stimulus, not hitting exact splits. If you felt okay, the run did its job.';
+      } else if(type==='tempo'){
+        body='A bit slower than tempo target today. Check in on your sleep and hydration\u2014consistently missing tempo pace can signal accumulated fatigue.';
+      } else {
+        body='Slower than the target, but you got through it. Not every session lands perfectly. The consistency matters more than any single workout.';
+      }
       statLine=fmtPace(pace)+' avg \u00b7 '+diffStr;
     } else {
       // On pace
@@ -2753,6 +2793,7 @@ function buildEncouragement(dist, secs, type, feel, planDay){
     }
   } else {
     // No plan comparison -- go by feel
+    var isCrossType=(type==='cross');
     var feelMessages={
       great:{emoji:'\uD83D\uDE0D',headline:'Outstanding run.',body:'Days like this are why we lace up. Remember this feeling when the tough ones come\u2014you\u2019ve earned it.'},
       good: {emoji:'\u2714\uFE0F',headline:'Solid work.',body:'A good run logged is a good run banked. Consistency is the whole game.'},
@@ -2870,16 +2911,26 @@ function renderTodayCard(weeks, startDateStr) {
   if(!day){ card.classList.remove('visible'); return; }
   todayPrescribed = day;
 
-  var isRest = (day.type==='rest'||day.type==='cross');
+  var isRest = (day.type==='rest');
+  var isCrossDay = (day.type==='cross');
 
   if(isRest){
     body.innerHTML =
-      '<div class="today-type-dot '+(day.type||'rest')+'"></div>'+
+      '<div class="today-type-dot rest"></div>'+
       '<div class="today-info">'+
-        '<div class="today-rest-msg">'+(day.type==='cross'?'Cross-Training Day':'Rest Day')+'</div>'+
+        '<div class="today-rest-msg">Rest Day</div>'+
         '<div class="today-detail">'+(day.detail||'Recovery is part of the plan. Take it easy today.')+'</div>'+
       '</div>';
     logBtn.style.display = 'none';
+  } else if(isCrossDay){
+    body.innerHTML =
+      '<div class="today-type-dot cross"></div>'+
+      '<div class="today-info">'+
+        '<div class="today-title">Cross-Training Day</div>'+
+        '<div class="today-detail">'+(day.detail||'Bike, swim, yoga, or strength. 30-45 min.')+'</div>'+
+      '</div>';
+    logBtn.style.display = 'block';
+    logBtn.textContent = 'Log Cross-Training';
   } else {
     body.innerHTML =
       '<div class="today-type-dot '+day.type+'"></div>'+
@@ -2894,6 +2945,7 @@ function renderTodayCard(weeks, startDateStr) {
         '</div>'
       :'');
     logBtn.style.display = 'block';
+    logBtn.textContent = 'Log This Run';
   }
 
   card.classList.add('visible');
@@ -2905,6 +2957,9 @@ function prefillTodayRun(){
   switchTab('log');
   document.getElementById('fDate').value = todayISO();
   document.getElementById('fType').value = todayPrescribed.type||'easy';
+  if(todayPrescribed.type==='cross'){
+    document.getElementById('fDist').value='';
+  }
   if(todayPrescribed.miles>0){
     document.getElementById('fDist').value = todayPrescribed.miles;
   }
